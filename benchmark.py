@@ -125,8 +125,11 @@ MODELS_TO_TEST = {
     # 后续我们会在这里添加更多模型
 }
 
-# --- 4. 主执行逻辑 ---
+# --- 4. 主执行逻辑 (修正版) ---
 if __name__ == '__main__':
+    # 导入一个用于创建简单对象的工具
+    from types import SimpleNamespace
+
     results = []
 
     # 创建一个固定的输入张量
@@ -141,26 +144,27 @@ if __name__ == '__main__':
 
                 print(f"--- Testing {model_name} | e_layers={e_layers} | d_model={d_model} ---")
 
-                # 构建模型配置字典
-                model_config = {
+                # 步骤1: 构建包含所有参数的字典
+                model_config_dict = {
                     'seq_len': CONFIG['seq_len'],
                     'pred_len': CONFIG['pred_len'],
                     'enc_in': CONFIG['channels'],
-                    'c_out': CONFIG['channels'],  # DLinear等模型使用c_out
+                    'dec_in': CONFIG['channels'],  # Transformer类模型需要
+                    'c_out': CONFIG['channels'],
                     'e_layers': e_layers,
                     'd_model': d_model,
                     'd_ff': d_ff,
+                    'output_attention': False,  # Transformer类模型需要
+                    'n_heads': 8,  # Transformer类模型需要一个默认值
                 }
-                model_config.update(model_info['params'])  # 添加模型的特定参数
+                model_config_dict.update(model_info['params'])
 
                 try:
-                    # 筛选出模型类__init__需要的参数
-                    model_class = model_info['class']
-                    valid_keys = model_class.__init__.__code__.co_varnames
-                    filtered_config = {k: v for k, v in model_config.items() if k in valid_keys}
+                    # 步骤2: 将字典转换为一个configs对象
+                    configs_obj = SimpleNamespace(**model_config_dict)
 
-                    # 实例化模型
-                    model = model_class(**filtered_config).to(CONFIG['device'])
+                    # 步骤3: 实例化模型时，直接传入这个对象
+                    model = model_info['class'](configs_obj).to(CONFIG['device'])
 
                     # 获取性能指标
                     stats = get_model_stats(model, model_name, CONFIG, input_tensor)
@@ -176,7 +180,6 @@ if __name__ == '__main__':
 
                 except Exception as e:
                     print(f"  [ERROR] Failed for {model_name} with config {e_layers, d_model}. Error: {e}")
-                    # 记录失败信息
                     results.append({
                         'Model': model_name,
                         'e_layers': e_layers,
