@@ -20,6 +20,14 @@ from models.iTransformer import Model as iTransformer
 from models.Crossformer import Model as Crossformer
 from models.TimesNet import Model as TimesNet
 from models.Koopa import Model as Koopa
+from models.TimeFilter.models.TimeFilter import Model as TimeFilter
+from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
+from models.CONTIME.contime import CONTIME as CONTIME
+from models.LinOSS.models.LinOSS import LinOSS
+from models.S_D_Mamba.model.S_Mamba import Model as S_D_Mamba
+from models.TimePro.model.TimePro import Model as TimePro
+from models.DeepEDM.models.DeepEDM import Model as DeepEDM
+from models.SimpleTM.model.SimpleTM import Model as SimpleTM
 
 
 # --- 3. 定义核心评测函数 (优化稳健版) ---
@@ -36,6 +44,28 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     x_dec = torch.cat([dec_inp_history, dec_inp_zeros], dim=1).to(device)
     x_mark_dec = torch.randn(batch_size, label_len + pred_len, 4).to(device)
 
+    # --- 核心修复：从模型配置中动态获取 patch_len ---
+    # 为 TimeFilter 创建 masks
+    try:
+        # 尝试从模型实例的配置中获取 patch_len
+        patch_len = model.configs.patch_len
+    except AttributeError:
+        # 如果模型没有 configs.patch_len (例如非 TimeFilter 模型)，
+        # 提供一个默认值以避免在尝试调用 TimeFilter 时出错。
+        patch_len = 16
+
+    L = seq_len * channels // patch_len
+    N = seq_len // patch_len
+    masks = []
+    for k in range(L):
+        S = ((torch.arange(L) % N == k % N) & (torch.arange(L) != k)).to(torch.float32).to(device)
+        T = ((torch.arange(L) >= k // N * N) & (torch.arange(L) < k // N * N + N) & (torch.arange(L) != k)).to(
+            torch.float32).to(device)
+        ST = torch.ones(L).to(torch.float32).to(device) - S - T
+        ST[k] = 0.0
+        masks.append(torch.stack([S, T, ST], dim=0))
+    masks = torch.stack(masks, dim=0)
+
     model.to(device)
     model.eval()
 
@@ -43,23 +73,49 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     model_call = None
     profile_inputs = None
     try:
-        # 尝试使用完整的4个参数，适用于Transformer类模型
-        _ = model(x_enc, x_mark_enc, x_dec, x_mark_dec)
+        # 尝试 FourierGNN 的调用方式 (B, N, L)
+        _ = model(x_enc.permute(0, 2, 1))
 
-        def call_full():
-            return model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
+        def call_fouriergnn():
+            return model(x_enc.permute(0, 2, 1).clone())
 
-        model_call = call_full
-        profile_inputs = (x_enc, x_mark_enc, x_dec, x_mark_dec)
-    except TypeError:
-        # 如果失败，则回退到只使用x_enc，适用于DLinear等简单模型
-        _ = model(x_enc)  # 验证此调用是否可行
+        model_call = call_fouriergnn
+        profile_inputs = (x_enc.permute(0, 2, 1),)
+        print("  [Info] Using FourierGNN call style (x_enc permuted)")
 
-        def call_simple():
-            return model(x_enc.clone())
+    except Exception:
+        try:
+            # 尝试 TimeFilter 的调用方式
+            _ = model(x_enc, masks, is_training=False)
 
-        model_call = call_simple
-        profile_inputs = (x_enc,)
+            def call_timefilter():
+                return model(x_enc.clone(), masks.clone(), is_training=False)
+
+            model_call = call_timefilter
+            profile_inputs = (x_enc, masks, False)
+            print("  [Info] Using TimeFilter call style")
+
+        except Exception:
+            try:
+                # 尝试使用完整的4个参数，适用于Transformer类模型
+                _ = model(x_enc, x_mark_enc, x_dec, x_mark_dec)
+
+                def call_full():
+                    return model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
+
+                model_call = call_full
+                profile_inputs = (x_enc, x_mark_enc, x_dec, x_mark_dec)
+                print("  [Info] Using full 4-param call style")
+            except TypeError:
+                # 如果失败，则回退到只使用x_enc，适用于DLinear等简单模型
+                _ = model(x_enc)  # 验证此调用是否可行
+
+                def call_simple():
+                    return model(x_enc.clone())
+
+                model_call = call_simple
+                profile_inputs = (x_enc,)
+                print("  [Info] Using simple x_enc call style")
 
     # --- 3. 使用确定的调用方式进行所有测试 ---
     if device.type == 'cpu':
@@ -118,8 +174,16 @@ MODELS_TO_TEST = {
     "iTransformer": {"class": iTransformer, "params": {}},
     "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
     "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
-    "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
-    "Koopa": {"class": Koopa, "params": {}},
+    # "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
+    # "Koopa": {"class": Koopa, "params": {}},
+    # "TimeFilter": {"class": TimeFilter, "params": {}},
+    # "FourierGNN": {"class": FourierGNN, "params": {}},
+    "CONTIME": {"class": CONTIME, "params": {}},
+    "LinOSS": {"class": LinOSS, "params": {}},
+    "S_D_Mamba": {"class": S_D_Mamba, "params": {}},
+    "TimePro": {"class": TimePro, "params": {}},
+    "DeepEDM": {"class": DeepEDM, "params": {}},
+    "SimpleTM": {"class": SimpleTM, "params": {}},
 }
 
 # --- 5. 主执行逻辑 ---
@@ -182,6 +246,14 @@ if __name__ == '__main__':
         'num_workers': 0,  # <--- 添加此行来修复错误
         'num_class': 1,  # <--- 为分类任务模型预先添加
         'factor': 3,
+
+        # --- 为 TimeFilter 模型添加的缺失参数 ---
+        'patch_len': 16,  # <--- 添加: TimeFilter 需要
+        'stride': 8,  # <--- 添加: TimeFilter 需要
+        'revin': True,  # <--- 添加: TimeFilter 需要
+        'alpha': 0.25,
+        'top_p': 1.0,
+        'pos': 0,
     }
 
     all_results = []
@@ -204,8 +276,39 @@ if __name__ == '__main__':
                 current_config_dict.update(model_info['params'])
 
                 try:
-                    configs_obj = SimpleNamespace(**current_config_dict)
-                    model = model_info['class'](configs_obj)
+                    # --- 核心修改：为不同构造函数的模型添加特殊处理 ---
+                    if model_name == "FourierGNN":
+                        # FourierGNN 需要独立的参数
+                        model = model_info['class'](
+                            pre_length=current_config_dict['pred_len'],
+                            embed_size=current_config_dict['d_model'],
+                            feature_size=current_config_dict['enc_in'],
+                            seq_length=current_config_dict['seq_len'],
+                            hidden_size=current_config_dict['d_ff']
+                        )
+                    elif model_name == "LinOSS":
+                        # LinOSS 需要独立的参数
+                        model = model_info['class'](
+                            input_dim=current_config_dict['enc_in'],
+                            hidden_dim=current_config_dict['d_model'],
+                            output_dim=current_config_dict['c_out'],
+                            vf_depth=2,  # 使用默认值
+                            vf_width=128,  # 使用默认值
+                            num_blocks=current_config_dict['e_layers'],
+                            ssm_dim=64,  # 使用默认值
+                            ssm_blocks=2,  # 使用默认值
+                            solver='rk4',  # 使用默认值
+                            step_size=0.1,  # 使用默认值
+                            use_imex=False,  # 使用默认值
+                            imex_ssm_blocks=0,  # 使用默认值
+                            lambd=0.0,  # 使用默认值
+                            scale=1.0,  # 使用默认值
+                            t_final=current_config_dict['seq_len'],  # 将序列长度作为t_final
+                        )
+                    else:
+                        # 其他模型使用通用的 configs 对象
+                        configs_obj = SimpleNamespace(**current_config_dict)
+                        model = model_info['class'](configs_obj)
 
                     for device in devices_to_test:
                         print(f"  > Testing on {device.type.upper()}...")
