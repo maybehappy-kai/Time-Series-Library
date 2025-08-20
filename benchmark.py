@@ -119,8 +119,20 @@ MODELS_TO_TEST = {
 
 # --- 5. 主执行逻辑 ---
 if __name__ == '__main__':
-    with open('dummy.csv', 'w') as f:
-        f.write('date,OT\n2023-01-01 00:00:00,0\n')
+    # +++ 使用 pandas 生成正确的时间序列 +++
+    # 1. 定义起始时间和数据点数量
+    start_date = "2023-01-01 00:00:00"
+    num_rows = 1166  # 确保训练集足够大的最小行数
+
+    # 2. 'h' 表示每小时一个数据点，可以根据需要更改为 'min'（分钟）或 'S'（秒）
+    dates = pd.to_datetime(pd.date_range(start=start_date, periods=num_rows, freq='h'))
+
+    # 3. 创建 DataFrame 并保存到 dummy.csv
+    dummy_df = pd.DataFrame({
+        'date': dates,
+        'OT': range(num_rows)  # 使用简单递增的数值
+    })
+    dummy_df.to_csv('dummy.csv', index=False)
     devices_to_test = [torch.device('cpu')]
     if torch.cuda.is_available():
         devices_to_test.append(torch.device('cuda'))
@@ -161,6 +173,8 @@ if __name__ == '__main__':
 
         # --- 解决本次报错的最终关键参数 ---
         'seasonal_patterns': 'Monthly',  # <--- Koopa模型初始化需要此参数
+        'augmentation_ratio': 0,  # <--- 添加此行来修复错误
+        'num_workers': 0,  # <--- 添加此行来修复错误
         'num_class': 1,  # <--- 为分类任务模型预先添加
     }
 
