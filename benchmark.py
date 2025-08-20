@@ -22,12 +22,13 @@ from models.TimesNet import Model as TimesNet
 from models.Koopa import Model as Koopa
 
 
-# --- 3. 定义核心评测函数 ---
+# --- 3. 定义核心评测函数 (优化稳健版) ---
 def get_model_stats_for_device(model, model_name, config, device, iterations=50):
     stats = {}
     batch_size, seq_len, channels = config['batch_size'], config['seq_len'], config['channels']
     pred_len, label_len = config['pred_len'], config['label_len']
 
+    # --- 1. 创建所有可能的输入张量 ---
     x_enc = torch.randn(batch_size, seq_len, channels).to(device)
     x_mark_enc = torch.randn(batch_size, seq_len, 4).to(device)
     dec_inp_history = torch.randn(batch_size, label_len, channels).to(device)
@@ -36,33 +37,57 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     x_mark_dec = torch.randn(batch_size, label_len + pred_len, 4).to(device)
 
     model.to(device)
+    model.eval()
 
+    # --- 2. 智能检测并确定正确的模型调用方式 ---
+    model_call = None
+    profile_inputs = None
+    try:
+        # 尝试使用完整的4个参数，适用于Transformer类模型
+        _ = model(x_enc, x_mark_enc, x_dec, x_mark_dec)
+
+        def call_full():
+            return model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
+
+        model_call = call_full
+        profile_inputs = (x_enc, x_mark_enc, x_dec, x_mark_dec)
+    except TypeError:
+        # 如果失败，则回退到只使用x_enc，适用于DLinear等简单模型
+        _ = model(x_enc)  # 验证此调用是否可行
+
+        def call_simple():
+            return model(x_enc.clone())
+
+        model_call = call_simple
+        profile_inputs = (x_enc,)
+
+    # --- 3. 使用确定的调用方式进行所有测试 ---
     if device.type == 'cpu':
         with torch.no_grad():
             try:
-                macs, params = profile(model, inputs=(x_enc, x_mark_enc, x_dec, x_mark_dec), verbose=False)
-            except Exception:
-                try:
-                    macs, params = profile(model, inputs=(x_enc,), verbose=False)
-                except Exception as e:
-                    print(f"  [Warning] MACs/FLOPs calculation failed: {e}")
-                    macs, params = 0, sum(p.numel() for p in model.parameters() if p.requires_grad)
+                # 使用检测到的正确输入进行profile
+                macs, params = profile(model, inputs=profile_inputs, verbose=False)
+            except Exception as e:
+                print(f"  [Warning] MACs/FLOPs calculation failed: {e}")
+                macs, params = 0, sum(p.numel() for p in model.parameters() if p.requires_grad)
         stats['Params (M)'] = round(params / 1e6, 4)
         stats['MACs (G)'] = round(macs / 1e9, 4)
         stats['FLOPs (G)'] = round(2 * macs / 1e9, 4)
 
     with torch.inference_mode():
+        warmup_iters = 20 if device.type == 'cuda' else 10
+        for _ in range(warmup_iters):
+            _ = model_call()
+
         if device.type == 'cuda':
             torch.cuda.synchronize()
-            for _ in range(20): _ = model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
-            torch.cuda.synchronize()
             torch.cuda.reset_peak_memory_stats()
-        else:
-            for _ in range(10): _ = model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
 
         start_time = time.time()
-        for _ in range(iterations): _ = model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
-        if device.type == 'cuda': torch.cuda.synchronize()
+        for _ in range(iterations):
+            _ = model_call()
+        if device.type == 'cuda':
+            torch.cuda.synchronize()
         end_time = time.time()
 
     total_time = end_time - start_time
@@ -84,15 +109,18 @@ CONFIG = {
 E_LAYERS_LIST = [1, 2, 3]
 D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
 MODELS_TO_TEST = {
-    "DLinear": {"class": DLinear, "params": {"individual": False}},
-    "iTransformer": {"class": iTransformer, "params": {}},
-    "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
-    "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
-    "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
+    # "DLinear": {"class": DLinear, "params": {"individual": False}},
+    # "iTransformer": {"class": iTransformer, "params": {}},
+    # "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
+    # "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
+    # "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
+    "Koopa": {"class": Koopa, "params": {}},
 }
 
 # --- 5. 主执行逻辑 ---
 if __name__ == '__main__':
+    with open('dummy.csv', 'w') as f:
+        f.write('date,OT\n2023-01-01 00:00:00,0\n')
     devices_to_test = [torch.device('cpu')]
     if torch.cuda.is_available():
         devices_to_test.append(torch.device('cuda'))
@@ -102,14 +130,38 @@ if __name__ == '__main__':
     if 'cuda' in [d.type for d in devices_to_test]: print(f"CUDA Device: {torch.cuda.get_device_name(0)}")
     print(f"{'=' * 60}")
 
-    # --- 基础配置模板 (已补全) ---
+    # +++ 修改后 (最终的、保证运行的版本) +++
     BASE_CONFIGS = {
-        'task_name': 'long_term_forecast', 'is_training': False, 'moving_avg': 25, 'embed': 'timeF', 'freq': 'h',
-        'dropout': 0.1, 'factor': 1, 'n_heads': 8, 'd_layers': 1, 'activation': 'gelu', 'output_attention': False,
-        'distil': True, 'num_class': 1, 'p_hidden_dims': [128, 128], 'p_hidden_layers': 2,
+        # --- 核心任务参数 ---
+        'task_name': 'long_term_forecast',
+        'is_training': False,
+
+        # --- 模型结构与超参数 (大部分模型通用) ---
+        'n_heads': 8,
+        'd_layers': 1,
+        'dropout': 0.1,
+        'activation': 'gelu',
+        'output_attention': False,
+        'distil': True,
+        'moving_avg': 25,
+        'p_hidden_dims': [128, 128],  # for TiDE
+        'p_hidden_layers': 2,  # for TiDE
+        'num_kernels': 6,  # for TimesNet
+
+        # --- 数据与路径相关的虚拟参数 (为满足模型初始化需求) ---
+        'data': 'custom',
+        'root_path': './',
+        'data_path': 'dummy.csv',
+        'features': 'M',
+        'target': 'OT',
+        'embed': 'timeF',
+        'freq': 'h',
+        'checkpoints': './checkpoints/',
         'label_len': CONFIG['label_len'],
-        'num_kernels': 6,  # <-- 为TimesNet添加
-        'data': 'custom',  # <-- 为Koopa添加
+
+        # --- 解决本次报错的最终关键参数 ---
+        'seasonal_patterns': 'Monthly',  # <--- Koopa模型初始化需要此参数
+        'num_class': 1,  # <--- 为分类任务模型预先添加
     }
 
     all_results = []
@@ -121,7 +173,10 @@ if __name__ == '__main__':
 
                 combined_run_info = {'Model': model_name, 'e_layers': e_layers, 'd_model': d_model}
                 current_config_dict = BASE_CONFIGS.copy()
+
+                # *** 核心修复 1: 将batch_size添加到模型配置中 ***
                 current_config_dict.update({
+                    'batch_size': CONFIG['batch_size'],
                     'seq_len': CONFIG['seq_len'], 'pred_len': CONFIG['pred_len'], 'enc_in': CONFIG['channels'],
                     'dec_in': CONFIG['channels'], 'c_out': CONFIG['channels'], 'e_layers': e_layers,
                     'd_model': d_model, 'd_ff': d_ff,
@@ -162,4 +217,4 @@ if __name__ == '__main__':
         df.to_csv(f, index=False)
 
     print(f"\n\nBenchmark finished.\nAll results saved to {output_filename}")
-    print(df.head())
+    print(df.head().to_string())
