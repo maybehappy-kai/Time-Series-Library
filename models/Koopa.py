@@ -255,7 +255,7 @@ class Model(nn.Module):
         self.input_len = configs.seq_len
         self.pred_len = configs.pred_len
 
-        self.seg_len = self.pred_len
+        self.seg_len = 24
         self.num_blocks = num_blocks
         self.dynamic_dim = dynamic_dim
         self.hidden_dim = hidden_dim

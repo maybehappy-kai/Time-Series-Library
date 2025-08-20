@@ -104,7 +104,7 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
 
 # --- 4. 定义测试配置 ---
 CONFIG = {
-    'batch_size': 8, 'seq_len': 1440, 'label_len': 48, 'pred_len': 720, 'channels': 32,
+    'batch_size': 8, 'seq_len': 96, 'label_len': 48, 'pred_len': 720, 'channels': 32,
 }
 E_LAYERS_LIST = [1, 2, 3]
 D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     # +++ 使用 pandas 生成正确的时间序列 +++
     # 1. 定义起始时间和数据点数量
     start_date = "2023-01-01 00:00:00"
-    num_rows = 3086  # 确保训练集足够大的最小行数
+    num_rows = 1166  # 确保训练集足够大的最小行数
 
     # 2. 'h' 表示每小时一个数据点，可以根据需要更改为 'min'（分钟）或 'S'（秒）
     dates = pd.to_datetime(pd.date_range(start=start_date, periods=num_rows, freq='h'))
