@@ -3,9 +3,9 @@ import time
 import pandas as pd
 import os
 import platform
-from thop import profile
 import warnings
 from types import SimpleNamespace
+import torchinfo
 
 # --- 1. 环境与可复现性设置 ---
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -65,11 +65,16 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     if device.type == 'cpu':
         with torch.no_grad():
             try:
-                # 使用检测到的正确输入进行profile
-                macs, params = profile(model, inputs=profile_inputs, verbose=False)
+                # 使用 torchinfo 来分析模型
+                # 注意：profile_inputs 是一个元组，需要用 * 解包
+                summary = torchinfo.summary(model, input_data=profile_inputs, verbose=0)
+                params = summary.total_params
+                macs = summary.total_mult_adds
             except Exception as e:
-                print(f"  [Warning] MACs/FLOPs calculation failed: {e}")
-                macs, params = 0, sum(p.numel() for p in model.parameters() if p.requires_grad)
+                print(f"  [Warning] torchinfo failed: {e}")
+                macs = 0
+                params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
         stats['Params (M)'] = round(params / 1e6, 4)
         stats['MACs (G)'] = round(macs / 1e9, 4)
         stats['FLOPs (G)'] = round(2 * macs / 1e9, 4)
@@ -109,11 +114,11 @@ CONFIG = {
 E_LAYERS_LIST = [1, 2, 3]
 D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
 MODELS_TO_TEST = {
-    # "DLinear": {"class": DLinear, "params": {"individual": False}},
-    # "iTransformer": {"class": iTransformer, "params": {}},
-    # "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
-    # "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
-    # "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
+    "DLinear": {"class": DLinear, "params": {"individual": False}},
+    "iTransformer": {"class": iTransformer, "params": {}},
+    "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
+    "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
+    "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
     "Koopa": {"class": Koopa, "params": {}},
 }
 
@@ -176,6 +181,7 @@ if __name__ == '__main__':
         'augmentation_ratio': 0,  # <--- 添加此行来修复错误
         'num_workers': 0,  # <--- 添加此行来修复错误
         'num_class': 1,  # <--- 为分类任务模型预先添加
+        'factor': 3,
     }
 
     all_results = []
