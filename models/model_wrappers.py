@@ -132,3 +132,4 @@ finally:
     clear_module_cache('layers')
     # 为保险起见，也清理本次导入相关的 models 缓存
     clear_module_cache('models.FilterNet')
+    clear_module_cache('utils')
