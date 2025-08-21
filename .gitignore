@@ -168,3 +168,15 @@ run_anylearn.py
 environment.txt
 
 /dummy.csv
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/.ninja_deps
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/.ninja_log
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/build.ninja
+/models/TimePro/selective_scan/selective_scan_rh.egg-info/dependency_links.txt
+/models/TimePro/selective_scan/selective_scan_rh.egg-info/PKG-INFO
+/models/TimePro/selective_scan/selective_scan_rh.egg-info/requires.txt
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/csrc/selective_scan/cusoflexrh/selective_scan_core_bwd.o
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/csrc/selective_scan/cusoflexrh/selective_scan_core_fwd.o
+/models/TimePro/selective_scan/build/lib.linux-x86_64-cpython-311/selective_scan_cuda_oflex_rh.cpython-311-x86_64-linux-gnu.so
+/models/TimePro/selective_scan/build/temp.linux-x86_64-cpython-311/csrc/selective_scan/cusoflexrh/selective_scan_oflex_rh.o
+/models/TimePro/selective_scan/selective_scan_rh.egg-info/SOURCES.txt
+/models/TimePro/selective_scan/selective_scan_rh.egg-info/top_level.txt

@@ -14,20 +14,9 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from models.DLinear import Model as DLinear
-from models.PatchTST import Model as PatchTST
-from models.iTransformer import Model as iTransformer
-from models.Crossformer import Model as Crossformer
-from models.TimesNet import Model as TimesNet
-from models.Koopa import Model as Koopa
-from models.TimeFilter.models.TimeFilter import Model as TimeFilter
+from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM
 from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
-from models.CONTIME.contime import CONTIME as CONTIME
 from models.LinOSS.models.LinOSS import LinOSS
-from models.S_D_Mamba.model.S_Mamba import Model as S_D_Mamba
-from models.TimePro.model.TimePro import Model as TimePro
-from models.DeepEDM.models.DeepEDM import Model as DeepEDM
-from models.SimpleTM.model.SimpleTM import Model as SimpleTM
 from models.TQNet.models.TQNet import Model as TQNet
 from models.ModernTCN.ModernTCN_Long_term_forecasting.models.ModernTCN import Model as ModernTCN
 from models.FilterNet.models.PaiFilter import Model as FilterNet  # PaiFilter is named FilterNet
@@ -35,6 +24,12 @@ from models.NFM.Forecasting.NFM_FC import NFM
 from models.TimeKAN.models.TimeKAN import Model as TimeKAN
 from pypots.imputation import TimeMixerPP
 from models.SOFTS.models.SOFTS import Model as SOFTS
+from models.DLinear import Model as DLinear
+from models.PatchTST import Model as PatchTST
+from models.iTransformer import Model as iTransformer
+from models.Crossformer import Model as Crossformer
+from models.TimesNet import Model as TimesNet
+from models.Koopa import Model as Koopa
 
 
 # --- 3. 定义核心评测函数 (优化稳健版) ---
@@ -225,6 +220,19 @@ MODELS_TO_TEST = {
 
 # --- 5. 主执行逻辑 ---
 if __name__ == '__main__':
+    # +++ 新增代码 +++
+    # --- 从用户输入获取要测试的模型名称 ---
+    available_models = list(MODELS_TO_TEST.keys())
+    print("Available models to test:", ", ".join(available_models))
+    target_model_name = input("请输入您想要测试的模型名称: ")
+
+    # --- 筛选要测试的模型 ---
+    if target_model_name in MODELS_TO_TEST:
+        MODELS_TO_TEST = {target_model_name: MODELS_TO_TEST[target_model_name]}
+    else:
+        print(f"错误：模型 '{target_model_name}' 不在可测试的模型列表中。程序将退出。")
+        exit()
+    # +++ 新增代码结束 +++
     # +++ 使用 pandas 生成正确的时间序列 +++
     # 1. 定义起始时间和数据点数量
     start_date = "2023-01-01 00:00:00"
@@ -399,7 +407,8 @@ if __name__ == '__main__':
 
     # --- 6. 保存结果 ---
     if not os.path.exists('results'): os.makedirs('results')
-    output_filename = "results/benchmark_results.csv"
+    # +++ 修改下面这行代码 +++
+    output_filename = f"results/benchmark_results_{target_model_name}.csv"
     df = pd.DataFrame(all_results)
 
     fixed_cols = ['Model', 'e_layers', 'd_model', 'Params (M)', 'MACs (G)', 'FLOPs (G)']
