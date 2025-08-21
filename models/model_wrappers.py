@@ -83,3 +83,15 @@ try:
 finally:
     sys.path[:] = original_path_stm
     clear_module_cache('layers')
+
+# --- Wrapper for ModernTCN ---
+original_path_mtcn = list(sys.path)
+try:
+    # 构造 ModernTCN 子模块的根目录路径
+    submodule_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ModernTCN_TrueVersion')
+    sys.path.insert(0, submodule_root)
+    # 根据 ModernTCN 项目的真实结构进行导入
+    from models.ModernTCN_TrueVersion.models.ModernTCN import Model as ModernTCN
+finally:
+    # 恢复原始的 sys.path
+    sys.path[:] = original_path_mtcn
