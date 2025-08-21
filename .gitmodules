@@ -22,3 +22,21 @@
 [submodule "models/SimpleTM"]
 	path = models/SimpleTM
 	url = https://github.com/vsingh-group/simpletm.git
+[submodule "models/TQNet"]
+	path = models/TQNet
+	url = https://github.com/acat-scut/tqnet.git
+[submodule "models/ModernTCN"]
+	path = models/ModernTCN
+	url = https://github.com/luodhhh/moderntcn.git
+[submodule "models/FilterNet"]
+	path = models/FilterNet
+	url = https://github.com/aikunyi/filternet.git
+[submodule "models/NFM"]
+	path = models/NFM
+	url = https://github.com/minkiml/nfm.git
+[submodule "models/TimeKAN"]
+	path = models/TimeKAN
+	url = https://github.com/huangst21/timekan.git
+[submodule "models/SOFTS"]
+	path = models/SOFTS
+	url = https://github.com/secilia-cxy/softs.git

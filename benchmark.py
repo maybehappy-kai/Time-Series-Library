@@ -28,6 +28,13 @@ from models.S_D_Mamba.model.S_Mamba import Model as S_D_Mamba
 from models.TimePro.model.TimePro import Model as TimePro
 from models.DeepEDM.models.DeepEDM import Model as DeepEDM
 from models.SimpleTM.model.SimpleTM import Model as SimpleTM
+from models.TQNet.models.TQNet import Model as TQNet
+from models.ModernTCN.ModernTCN_Long_term_forecasting.models.ModernTCN import Model as ModernTCN
+from models.FilterNet.models.PaiFilter import Model as FilterNet  # PaiFilter is named FilterNet
+from models.NFM.Forecasting.NFM_FC import NFM
+from models.TimeKAN.models.TimeKAN import Model as TimeKAN
+from pypots.imputation import TimeMixerPP
+from models.SOFTS.models.SOFTS import Model as SOFTS
 
 
 # --- 3. 定义核心评测函数 (优化稳健版) ---
@@ -70,52 +77,75 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     model.eval()
 
     # --- 2. 智能检测并确定正确的模型调用方式 ---
+    # 为 TimeMixerPP 创建虚拟的 missing_mask
+    missing_mask = torch.zeros_like(x_enc).to(device)
     model_call = None
     profile_inputs = None
+
     try:
-        # 尝试 FourierGNN 的调用方式 (B, N, L)
-        _ = model(x_enc.permute(0, 2, 1))
+        # 尝试 TimeMixerPP 的调用方式
+        # PyPOTS 模型通常接受一个字典作为输入
+        _ = model({
+            "X": x_enc,
+            "missing_mask": missing_mask
+        })
 
-        def call_fouriergnn():
-            return model(x_enc.permute(0, 2, 1).clone())
+        def call_timemixerpp():
+            return model({
+                "X": x_enc.clone(),
+                "missing_mask": missing_mask.clone()
+            })
 
-        model_call = call_fouriergnn
-        profile_inputs = (x_enc.permute(0, 2, 1),)
-        print("  [Info] Using FourierGNN call style (x_enc permuted)")
+        model_call = call_timemixerpp
+        # torchinfo 不支持字典输入，所以我们用元组传递单个张量进行分析
+        profile_inputs = ({"X": x_enc, "missing_mask": missing_mask},)
+        print("  [Info] Using TimeMixerPP (PyPOTS) call style")
 
     except Exception:
         try:
-            # 尝试 TimeFilter 的调用方式
-            _ = model(x_enc, masks, is_training=False)
+            # 尝试 FourierGNN 的调用方式 (B, N, L)
+            _ = model(x_enc.permute(0, 2, 1))
 
-            def call_timefilter():
-                return model(x_enc.clone(), masks.clone(), is_training=False)
+            def call_fouriergnn():
+                return model(x_enc.permute(0, 2, 1).clone())
 
-            model_call = call_timefilter
-            profile_inputs = (x_enc, masks, False)
-            print("  [Info] Using TimeFilter call style")
+            model_call = call_fouriergnn
+            profile_inputs = (x_enc.permute(0, 2, 1),)
+            print("  [Info] Using FourierGNN call style (x_enc permuted)")
 
         except Exception:
             try:
-                # 尝试使用完整的4个参数，适用于Transformer类模型
-                _ = model(x_enc, x_mark_enc, x_dec, x_mark_dec)
+                # 尝试 TimeFilter 的调用方式
+                _ = model(x_enc, masks, is_training=False)
 
-                def call_full():
-                    return model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
+                def call_timefilter():
+                    return model(x_enc.clone(), masks.clone(), is_training=False)
 
-                model_call = call_full
-                profile_inputs = (x_enc, x_mark_enc, x_dec, x_mark_dec)
-                print("  [Info] Using full 4-param call style")
-            except TypeError:
-                # 如果失败，则回退到只使用x_enc，适用于DLinear等简单模型
-                _ = model(x_enc)  # 验证此调用是否可行
+                model_call = call_timefilter
+                profile_inputs = (x_enc, masks, False)
+                print("  [Info] Using TimeFilter call style")
 
-                def call_simple():
-                    return model(x_enc.clone())
+            except Exception:
+                try:
+                    # 尝试使用完整的4个参数，适用于Transformer类模型
+                    _ = model(x_enc, x_mark_enc, x_dec, x_mark_dec)
 
-                model_call = call_simple
-                profile_inputs = (x_enc,)
-                print("  [Info] Using simple x_enc call style")
+                    def call_full():
+                        return model(x_enc.clone(), x_mark_enc.clone(), x_dec.clone(), x_mark_dec.clone())
+
+                    model_call = call_full
+                    profile_inputs = (x_enc, x_mark_enc, x_dec, x_mark_dec)
+                    print("  [Info] Using full 4-param call style")
+                except TypeError:
+                    # 如果失败，则回退到只使用x_enc，适用于DLinear等简单模型
+                    _ = model(x_enc)  # 验证此调用是否可行
+
+                    def call_simple():
+                        return model(x_enc.clone())
+
+                    model_call = call_simple
+                    profile_inputs = (x_enc,)
+                    print("  [Info] Using simple x_enc call style")
 
     # --- 3. 使用确定的调用方式进行所有测试 ---
     if device.type == 'cpu':
@@ -184,6 +214,13 @@ MODELS_TO_TEST = {
     "TimePro": {"class": TimePro, "params": {}},
     "DeepEDM": {"class": DeepEDM, "params": {}},
     "SimpleTM": {"class": SimpleTM, "params": {}},
+    "TQNet": {"class": TQNet, "params": {}},
+    "ModernTCN": {"class": ModernTCN, "params": {}},
+    "FilterNet": {"class": FilterNet, "params": {}},
+    "NFM": {"class": NFM, "params": {}},
+    "TimeKAN": {"class": TimeKAN, "params": {}},
+    "TimeMixerPP": {"class": TimeMixerPP, "params": {}},
+    "SOFTS": {"class": SOFTS, "params": {}},
 }
 
 # --- 5. 主执行逻辑 ---
@@ -304,6 +341,46 @@ if __name__ == '__main__':
                             lambd=0.0,  # 使用默认值
                             scale=1.0,  # 使用默认值
                             t_final=current_config_dict['seq_len'],  # 将序列长度作为t_final
+                        )
+                    elif model_name == "NFM":
+                        # NFM 需要独立的参数
+                        model = model_info['class'](
+                            seq_len=current_config_dict['seq_len'],
+                            pred_len=current_config_dict['pred_len'],
+                            enc_in=current_config_dict['enc_in'],
+                            d_model=current_config_dict['d_model'],
+                            e_layers=current_config_dict['e_layers'],
+                            d_ff=current_config_dict['d_ff'],
+                            # 以下为NFM的特有参数，使用默认值
+                            M=1024,
+                            out_channel=16,
+                            r=4,
+                            ll=1,
+                            attn='softmax',
+                            num_L=3,
+                            num_S=3,
+                            num_heads=4
+                        )
+                    elif model_name == "TimeMixerPP":
+                        # TimeMixerPP 需要独立的参数
+                        model = model_info['class'](
+                            n_steps=current_config_dict['seq_len'],
+                            n_features=current_config_dict['enc_in'],
+                            n_layers=current_config_dict['e_layers'],
+                            d_model=current_config_dict['d_model'],
+                            d_ffn=current_config_dict['d_ff'],
+                            top_k=current_config_dict.get('top_k', 5),  # 从配置获取或使用默认值
+                            n_heads=current_config_dict.get('n_heads', 8),
+                            n_kernels=current_config_dict.get('num_kernels', 6),
+                            dropout=current_config_dict.get('dropout', 0.1),
+                            # 使用PyPOTS库的默认值
+                            channel_mixing=True,
+                            channel_independence=True,
+                            downsampling_layers=3,
+                            downsampling_window=2,
+                            apply_nonstationary_norm=False,
+                            # 评测脚本需要的参数
+                            epochs=1  # 设为1，因为我们不在这里训练
                         )
                     else:
                         # 其他模型使用通用的 configs 对象
