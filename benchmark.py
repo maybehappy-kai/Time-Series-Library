@@ -14,11 +14,10 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM
+from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN
 from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
 from models.LinOSS.models.LinOSS import LinOSS
 from models.TQNet.models.TQNet import Model as TQNet
-from models.ModernTCN.ModernTCN_Long_term_forecasting.models.ModernTCN import Model as ModernTCN
 from models.FilterNet.models.PaiFilter import Model as FilterNet  # PaiFilter is named FilterNet
 from models.NFM.Forecasting.NFM_FC import NFM
 from models.TimeKAN.models.TimeKAN import Model as TimeKAN
