@@ -95,3 +95,40 @@ try:
 finally:
     # 恢复原始的 sys.path
     sys.path[:] = original_path_mtcn
+
+# --- Wrapper for NFM ---
+from models.NFM_TrueVersion.Forecasting.NFM_FC import NFM_FC as NFM
+
+# --- Wrapper for TimeKAN ---
+original_path_tkan = list(sys.path)
+clear_module_cache('layers')
+try:
+    submodule_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TimeKAN')
+    sys.path.insert(0, submodule_root)
+    import layers # 主动抢占缓存
+    from models.TimeKAN.models.TimeKAN import Model as TimeKAN
+finally:
+    sys.path[:] = original_path_tkan
+    clear_module_cache('layers')
+
+# --- Wrapper for FilterNet (已修正) ---
+original_path_fnet = list(sys.path)
+clear_module_cache('layers')
+try:
+    # 1. 设置正确的"临时起点"，这为了解决 PaiFilter.py 内部的 'from layers...' 问题
+    submodule_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'FilterNet')
+    sys.path.insert(0, submodule_root)
+
+    # 2. 主动抢占缓存，确保 'layers' 指向子模块的'layers'
+    import layers
+
+    # 3. 【关键修正】: 使用从项目根目录出发的、完整的、无歧义的路径来导入模型。
+    #    这和它最初在 benchmark.py 中的路径是一样的。
+    from models.FilterNet.models.PaiFilter import Model as FilterNet
+
+finally:
+    # 4. 恢复原始环境并清理缓存
+    sys.path[:] = original_path_fnet
+    clear_module_cache('layers')
+    # 为保险起见，也清理本次导入相关的 models 缓存
+    clear_module_cache('models.FilterNet')

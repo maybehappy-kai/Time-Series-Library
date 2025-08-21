@@ -1,3 +1,17 @@
+import sys
+import os
+
+# --- 关键修正：将项目根目录永久性地添加到系统搜索路径的最顶端 ---
+# __file__ 指向当前文件 (benchmark.py)
+# os.path.abspath(__file__) 获取该文件的绝对路径
+# os.path.dirname() 获取该文件所在的目录，也就是我们的项目根目录
+project_root = os.path.dirname(os.path.abspath(__file__))
+
+# 确保项目根目录在搜索路径的最前面，这样Python总能最先找到主项目的模块
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+# --- 修正结束 ---
+
 import torch
 import time
 import pandas as pd
@@ -14,13 +28,10 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN
+from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN, NFM, TimeKAN, FilterNet
 from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
 from models.LinOSS.models.LinOSS import LinOSS
 from models.TQNet.models.TQNet import Model as TQNet
-from models.FilterNet.models.PaiFilter import Model as FilterNet  # PaiFilter is named FilterNet
-from models.NFM.Forecasting.NFM_FC import NFM
-from models.TimeKAN.models.TimeKAN import Model as TimeKAN
 from pypots.imputation import TimeMixerPP
 from models.SOFTS.models.SOFTS import Model as SOFTS
 from models.DLinear import Model as DLinear
