@@ -33,7 +33,7 @@ finally:
 # --- Wrapper for CONTIME ---
 original_path_ct = list(sys.path)
 try:
-    submodule_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'CONTIME')
+    submodule_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'CONTIME_TrueVersion')
     sys.path.insert(0, submodule_root)
     from control_tower import Model_selection_part as CONTIME
 finally:

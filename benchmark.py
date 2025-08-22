@@ -28,7 +28,8 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN, NFM, TimeKAN, FilterNet
+from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN, NFM, TimeKAN, \
+    FilterNet
 from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
 from models.LinOSS.models.LinOSS import LinOSS
 from models.TQNet.models.TQNet import Model as TQNet
@@ -296,19 +297,23 @@ if __name__ == '__main__':
         'label_len': CONFIG['label_len'],
 
         # --- 解决本次报错的最终关键参数 ---
-        'seasonal_patterns': 'Monthly',  # <--- Koopa模型初始化需要此参数
-        'augmentation_ratio': 0,  # <--- 添加此行来修复错误
-        'num_workers': 0,  # <--- 添加此行来修复错误
-        'num_class': 1,  # <--- 为分类任务模型预先添加
+        'seasonal_patterns': 'Monthly',
+        'augmentation_ratio': 0,
+        'num_workers': 0,
+        'num_class': 1,
         'factor': 3,
 
         # --- 为 TimeFilter 模型添加的缺失参数 ---
-        'patch_len': 16,  # <--- 添加: TimeFilter 需要
-        'stride': 8,  # <--- 添加: TimeFilter 需要
-        'revin': True,  # <--- 添加: TimeFilter 需要
-        'alpha': 0.25,
+        'patch_len': 16,
+        'stride': 8,
+        'revin': True,
+        'alpha': 0.25,  # 这是TimeFilter的alpha，CONTIME有自己的alpha
         'top_p': 1.0,
         'pos': 0,
+
+        # +++ 为 CONTIME 模型新增的参数 (最终修复) +++
+        'beta': 0.01,  # CONTIME 需要
+        'interpolation': 'cubic'  # CONTIME 需要
     }
 
     all_results = []
@@ -399,6 +404,24 @@ if __name__ == '__main__':
                             apply_nonstationary_norm=False,
                             # 评测脚本需要的参数
                             epochs=1  # 设为1，因为我们不在这里训练
+                        )
+                    elif model_name == "CONTIME":
+                        # 1. 将模型名称转为小写，以匹配其内部的 'contime' 判断
+                        current_config_dict['model'] = model_name.lower()
+
+                        # 2. 添加其必需的 h_channels 和 dataset 属性
+                        current_config_dict['h_channels'] = current_config_dict['d_model']
+                        current_config_dict['dataset'] = current_config_dict['data']
+
+                        # 3. CONTIME 有一个独立的 alpha 参数，这里设置为其默认值
+                        current_config_dict['alpha'] = 0.8
+
+                        configs_obj = SimpleNamespace(**current_config_dict)
+                        model = model_info['class'](
+                            configs_obj,  # 第一个参数是 args 对象
+                            input_channels=current_config_dict['enc_in'],
+                            output_channels=current_config_dict['c_out'],
+                            device=torch.device('cpu')  # 先在CPU上初始化
                         )
                     else:
                         # 其他模型使用通用的 configs 对象
