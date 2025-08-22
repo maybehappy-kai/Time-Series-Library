@@ -28,7 +28,6 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from pypots.imputation import TimeMixerPP
 from models.DLinear import Model as DLinear
 from models.PatchTST import Model as PatchTST
 from models.iTransformer import Model as iTransformer
@@ -49,6 +48,7 @@ from models.FilterNet.models.PaiFilter import Model as FilterNet
 from models.NFM.Forecasting.NFM_FC import NFM
 from models.TimeKAN.models.TimeKAN import Model as TimeKAN
 from models.SOFTS.models.SOFTS import Model as SOFTS
+from pypots.imputation import TimeMixerPP
 
 
 # --- 3. 定义核心评测函数 (优化稳健版) ---
