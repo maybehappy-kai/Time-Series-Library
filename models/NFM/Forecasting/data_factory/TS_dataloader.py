@@ -1,4 +1,4 @@
-from Forecasting.data_factory.data_factory_fore import Forcasting_data
+from ...Forecasting.data_factory.data_factory_fore import Forcasting_data
 def Load_dataset(argw):
     data_ =  Forcasting_data(
                             path = argw["data_path"], 

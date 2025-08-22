@@ -3,8 +3,8 @@ import torch.nn.functional as F
 import torch
 import logging
 import os
-from model.NFM_backbone import NFM_general
-from utils.vars_ import HyperVariables
+from ..model.NFM_backbone import NFM_general
+from ..utils.vars_ import HyperVariables
 
 class NFM_AD(nn.Module):
     '''

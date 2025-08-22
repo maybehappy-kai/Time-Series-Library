@@ -1,13 +1,13 @@
 import argparse
 import os
 import torch
-from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
-from exp.exp_imputation import Exp_Imputation
-from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
-from exp.exp_anomaly_detection import Exp_Anomaly_Detection
-from exp.exp_classification import Exp_Classification
-from utils.print_args import print_args
-from utils.tools import load_and_merge_cfg_args
+from .exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
+from .exp.exp_imputation import Exp_Imputation
+from .exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
+from .exp.exp_anomaly_detection import Exp_Anomaly_Detection
+from .exp.exp_classification import Exp_Classification
+from .utils.print_args import print_args
+from .utils.tools import load_and_merge_cfg_args
 import random
 import numpy as np
 import pprint

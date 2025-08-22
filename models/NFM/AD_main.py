@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.backends import cudnn
 
-from AnomalyD.AD_solver import Solver
+from .AnomalyD.AD_solver import Solver
 
 def mkdir(directory):
     if not os.path.exists(directory):

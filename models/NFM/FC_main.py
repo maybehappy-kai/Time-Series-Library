@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.backends import cudnn
 
-from Forecasting.FC_solver import Solver
+from .Forecasting.FC_solver import Solver
 
 def mkdir(directory):
     if not os.path.exists(directory):

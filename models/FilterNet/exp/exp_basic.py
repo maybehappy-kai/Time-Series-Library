@@ -1,6 +1,6 @@
 import os
 import torch
-from models import DLinear, FreTS, TexFilter, PaiFilter
+from ..models import DLinear, FreTS, TexFilter, PaiFilter
 
 
 class Exp_Basic(object):

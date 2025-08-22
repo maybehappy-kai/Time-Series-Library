@@ -5,10 +5,10 @@ import logging
 import os
 import time
 
-from AnomalyD.NFM_AD import model_constructor
-from AnomalyD.data_factory.data_loader import get_loader_segment
-from utils.vars_ import HyperVariables
-from utils.logger_ import Value_averager
+from ..AnomalyD.NFM_AD import model_constructor
+from ..AnomalyD.data_factory.data_loader import get_loader_segment
+from ..utils.vars_ import HyperVariables
+from ..utils.logger_ import Value_averager
 
 import matplotlib.pyplot as plt
 from thop import profile

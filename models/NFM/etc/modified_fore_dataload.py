@@ -8,7 +8,7 @@ import torch
 import torch.fft as fft
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
-from utils.timefeatures import time_features
+from ..utils.timefeatures import time_features
 import warnings
 
 warnings.filterwarnings('ignore')

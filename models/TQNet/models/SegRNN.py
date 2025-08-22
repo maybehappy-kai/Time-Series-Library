@@ -4,7 +4,7 @@ A complete implementation version containing all code (including ablation compon
 
 import torch
 import torch.nn as nn
-from layers.RevIN import RevIN
+from ..layers.RevIN import RevIN
 
 class Model(nn.Module):
     def __init__(self, configs):

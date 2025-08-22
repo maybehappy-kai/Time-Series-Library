@@ -1,5 +1,5 @@
 import torch
-from Classification.data_factory.speech_dataset.speech_commands import SpeechCommands
+from ....Classification.data_factory.speech_dataset.speech_commands import SpeechCommands
 
 from typing import Tuple
 

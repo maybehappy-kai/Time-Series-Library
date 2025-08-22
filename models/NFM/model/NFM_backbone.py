@@ -1,10 +1,10 @@
 import torch.nn as nn
 import torch.nn.init as init
-from model.LFT import LFT_block, PositionalEncoding
-from model.Mixer_block import mixer_block
-from utils.vars_ import HyperVariables
-from model.util_nets import (PositionwiseFeedForward, mul_omega, Periodic_activation)
-from model.util_nets import fourier_mapping
+from ..model.LFT import LFT_block, PositionalEncoding
+from ..model.Mixer_block import mixer_block
+from ..utils.vars_ import HyperVariables
+from ..model.util_nets import (PositionwiseFeedForward, mul_omega, Periodic_activation)
+from ..model.util_nets import fourier_mapping
 class NFM_general(nn.Module):
     ''' 
     General NFM backbone encoder 

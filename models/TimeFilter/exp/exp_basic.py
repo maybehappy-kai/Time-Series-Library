@@ -1,6 +1,6 @@
 import os
 import torch
-from models import TimeFilter
+from ..models import TimeFilter
 
 
 class Exp_Basic(object):

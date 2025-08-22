@@ -3,7 +3,7 @@ import torch.nn as nn
 import time, math
 import einops
 
-from layers.EDM_Blocks import InputEncoder, LearnablePositionalEmbedding
+from ..layers.EDM_Blocks import InputEncoder, LearnablePositionalEmbedding
 
 class EDM(nn.Module):
     def __init__(

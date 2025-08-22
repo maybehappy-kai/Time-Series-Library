@@ -45,8 +45,8 @@ import jax.numpy as jnp
 import jax.random as jr
 import optax
 
-from data_dir.datasets import create_dataset
-from models.generate_model import create_model
+from .data_dir.datasets import create_dataset
+from .models.generate_model import create_model
 
 
 @eqx.filter_jit

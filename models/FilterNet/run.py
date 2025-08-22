@@ -1,8 +1,8 @@
 import argparse
 import os
 import torch
-from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
-from utils.print_args import print_args
+from .exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
+from .utils.print_args import print_args
 import random
 import numpy as np
 

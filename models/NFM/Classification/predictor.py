@@ -1,6 +1,6 @@
 import torch.nn as nn
-from utils.vars_ import HyperVariables
-from model.norms import NormalizationLayer
+from ..utils.vars_ import HyperVariables
+from ..model.norms import NormalizationLayer
 
 class Classifier(nn.Module):
     '''

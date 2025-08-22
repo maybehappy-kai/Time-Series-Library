@@ -2,12 +2,12 @@ import argparse
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from data.data_loader import Dataset_ECG, Dataset_Dhfm, Dataset_Solar, Dataset_Wiki
-from model.FourierGNN import FGN
+from .data.data_loader import Dataset_ECG, Dataset_Dhfm, Dataset_Solar, Dataset_Wiki
+from .model.FourierGNN import FGN
 import time
 import os
 import numpy as np
-from utils.utils import save_model, load_model, evaluate
+from .utils.utils import save_model, load_model, evaluate
 
 # main settings can be seen in markdown file (README.md)
 parser = argparse.ArgumentParser(description='fourier graph network for multivariate time series forecasting')

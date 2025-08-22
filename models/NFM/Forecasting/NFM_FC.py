@@ -3,10 +3,10 @@ import torch.nn.functional as F
 import torch
 import logging
 import os
-from model.NFM_backbone import NFM_general
+from ..model.NFM_backbone import NFM_general
 
-from utils.vars_ import HyperVariables
-from Forecasting.predictor import Forecasting_head
+from ..utils.vars_ import HyperVariables
+from ..Forecasting.predictor import Forecasting_head
 class NFM_FC(nn.Module):
     '''
     Wrapper class

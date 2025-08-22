@@ -1,5 +1,5 @@
 import torch
-from torchcde.interpolation_linear import linear_interpolation_coeffs
+from ..torchcde.interpolation_linear import linear_interpolation_coeffs
 
 
 def _setup_hermite_cubic_coeffs_w_backward_differences(times, coeffs, derivs, device=None):

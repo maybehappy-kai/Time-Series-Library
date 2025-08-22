@@ -1,6 +1,6 @@
 import os
 import torch
-from models import DeepEDM
+from ..models import DeepEDM
 
 
 class Exp_Basic(object):

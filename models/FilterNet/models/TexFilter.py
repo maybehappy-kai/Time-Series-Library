@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from layers.RevIN import RevIN
+from ..layers.RevIN import RevIN
 
 
 class Model(nn.Module):

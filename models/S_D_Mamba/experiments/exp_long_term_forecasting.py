@@ -1,9 +1,9 @@
 import random
 
-from data_provider.data_factory import data_provider
-from experiments.exp_basic import Exp_Basic
-from utils.tools import EarlyStopping, adjust_learning_rate, visual
-from utils.metrics import metric
+from ..data_provider.data_factory import data_provider
+from ..experiments.exp_basic import Exp_Basic
+from ..utils.tools import EarlyStopping, adjust_learning_rate, visual
+from ..utils.metrics import metric
 import torch
 import torch.nn as nn
 from torch import optim

@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 import math
 from torch.autograd import Variable
-from utils.vars_ import HyperVariables
-from model.util_nets import Siren_block
-from model.norms import NormalizationLayer
-from model.utilities import F_combine
+from ..utils.vars_ import HyperVariables
+from ..model.util_nets import Siren_block
+from ..model.norms import NormalizationLayer
+from ..model.utilities import F_combine
 
 class LFT_block(nn.Module):
     "Learnable frequency token embeddings"

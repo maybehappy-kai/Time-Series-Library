@@ -2,8 +2,8 @@ import math
 import torch
 import torch.nn as nn
 import numpy as np
-from model.utilities import (trunc_normal_, F_combine, clones, Permute)
-from utils.vars_ import HyperVariables
+from ..model.utilities import (trunc_normal_, F_combine, clones, Permute)
+from ..utils.vars_ import HyperVariables
 
 def Linear1d(
     in_channels: int,

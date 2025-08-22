@@ -30,8 +30,8 @@ import jax
 import jax.numpy as jnp
 import jax.random as jr
 
-from data_dir.hall_set import HallSet
-from models.NeuralCDEs import VectorField
+from ..data_dir.hall_set import HallSet
+from ..models.NeuralCDEs import VectorField
 
 
 class LogNeuralCDE(eqx.Module):

@@ -8,7 +8,7 @@ import tarfile
 import torch
 import torchaudio
 
-from Classification.data_factory.speech_dataset.utils import normalise_data, split_data, load_data, save_data, subsample
+from ....Classification.data_factory.speech_dataset.utils import normalise_data, split_data, load_data, save_data, subsample
 
 
 class SpeechCommands(torch.utils.data.TensorDataset):

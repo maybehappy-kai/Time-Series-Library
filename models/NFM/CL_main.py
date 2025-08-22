@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import torch
 from torch.backends import cudnn
-from Classification.CL_solver import Solver
+from .Classification.CL_solver import Solver
 
 def mkdir(directory):
     if not os.path.exists(directory):

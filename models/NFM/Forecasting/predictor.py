@@ -1,5 +1,5 @@
 import torch.nn as nn
-from utils.vars_ import HyperVariables
+from ..utils.vars_ import HyperVariables
 
 class Forecasting_head(nn.Module):
     '''

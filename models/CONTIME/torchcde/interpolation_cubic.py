@@ -1,5 +1,5 @@
 import torch
-from torchcde import interpolation_base
+from ..torchcde import interpolation_base
 
 from . import misc
 

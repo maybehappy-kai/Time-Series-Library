@@ -8,7 +8,7 @@ import torchdiffeq
 from random import SystemRandom
 import random
 import numpy as np 
-from parse import parse_args
+from .parse import parse_args
 import pathlib
 import os 
 import time 

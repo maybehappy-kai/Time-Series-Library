@@ -42,12 +42,12 @@ import diffrax
 import equinox as eqx
 import jax.random as jr
 
-from models.LogNeuralCDEs import LogNeuralCDE
-from models.LRU import LRU
-from models.NeuralCDEs import NeuralCDE, NeuralRDE
-from models.RNN import GRUCell, LinearCell, LSTMCell, MLPCell, RNN
-from models.S5 import S5
-from models.LinOSS import LinOSS
+from ..models.LogNeuralCDEs import LogNeuralCDE
+from ..models.LRU import LRU
+from ..models.NeuralCDEs import NeuralCDE, NeuralRDE
+from ..models.RNN import GRUCell, LinearCell, LSTMCell, MLPCell, RNN
+from ..models.S5 import S5
+from ..models.LinOSS import LinOSS
 
 
 def create_model(

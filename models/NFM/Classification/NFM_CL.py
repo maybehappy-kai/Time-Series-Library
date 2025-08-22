@@ -4,9 +4,9 @@ import torch
 import logging
 import os
 import math
-from model.NFM_backbone import NFM_general
-from utils.vars_ import HyperVariables
-from Classification.predictor import Classifier
+from ..model.NFM_backbone import NFM_general
+from ..utils.vars_ import HyperVariables
+from ..Classification.predictor import Classifier
 
 class NFM_CL(nn.Module):
     '''

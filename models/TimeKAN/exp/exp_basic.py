@@ -1,6 +1,6 @@
 import os
 import torch
-from models import TimeKAN
+from ..models import TimeKAN
 
 
 class Exp_Basic(object):

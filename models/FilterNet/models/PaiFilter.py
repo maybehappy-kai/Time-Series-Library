@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from layers.RevIN import RevIN
+from ..layers.RevIN import RevIN
 
 class Model(nn.Module):
 

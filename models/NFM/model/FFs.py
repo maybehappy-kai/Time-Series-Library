@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from model.utilities import trunc_normal_, F_combine
-from utils.vars_ import HyperVariables
-from model.norms import NormalizationLayer
-from model.util_nets import (Siren_block, CV_MLP)
-from model.LFT import lft_scale_bias
+from ..model.utilities import trunc_normal_, F_combine
+from ..utils.vars_ import HyperVariables
+from ..model.norms import NormalizationLayer
+from ..model.util_nets import (Siren_block, CV_MLP)
+from ..model.LFT import lft_scale_bias
 def complex_mul( x, weights):
     if weights.dim() ==2:
         return torch.einsum("...i,io->...o", x, weights)

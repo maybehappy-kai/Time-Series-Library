@@ -1,5 +1,5 @@
 
-from Classification.data_factory.data_factory_scla import classification_dataset
+from ...Classification.data_factory.data_factory_scla import classification_dataset
 
 def Load_dataset(
                  argw):

@@ -1,5 +1,5 @@
 import os
-from model import SimpleTM
+from ..model import SimpleTM
 import torch
 
 # Add this at the beginning of your training script

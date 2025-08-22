@@ -1,9 +1,9 @@
 import argparse
 import torch
-from experiments.exp_long_term_forecasting import Exp_Long_Term_Forecast
+from .experiments.exp_long_term_forecasting import Exp_Long_Term_Forecast
 import random
 import numpy as np
-from model.SimpleTM import Model
+from .model.SimpleTM import Model
 
 if __name__ == '__main__':
 

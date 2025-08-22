@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from layers.Embed import DataEmbedding_inverted
-from layers.Embed import PatchEmbedding
+from ..layers.Embed import DataEmbedding_inverted
+from ..layers.Embed import PatchEmbedding
 from einops import rearrange, repeat
 
 import selective_scan_cuda_oflex_rh

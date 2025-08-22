@@ -23,9 +23,9 @@ import jax.numpy as jnp
 import jax.random as jr
 import numpy as np
 
-from data_dir.dataloaders import Dataloader
-from data_dir.generate_coeffs import calc_coeffs
-from data_dir.generate_paths import calc_paths
+from ..data_dir.dataloaders import Dataloader
+from ..data_dir.generate_coeffs import calc_coeffs
+from ..data_dir.generate_paths import calc_paths
 
 
 @dataclass

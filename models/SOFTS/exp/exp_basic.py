@@ -2,7 +2,7 @@ import os
 
 import torch
 
-from models import SOFTS
+from ..models import SOFTS
 
 
 class Exp_Basic(object):
