@@ -35,6 +35,20 @@ from models.iTransformer import Model as iTransformer
 from models.Crossformer import Model as Crossformer
 from models.TimesNet import Model as TimesNet
 from models.Koopa import Model as Koopa
+from models.TimeFilter.models.TimeFilter import Model as TimeFilter
+from models.FourierGNN.models.fouriergnn import FourierGNN
+from models.CONTIME.contime import CONTIME
+from models.linoss.models.linoss import LinOSS
+from models.S_D_Mamba.models.mamba import Mamba as S_D_Mamba
+from models.TimePro.models.TimePro import Model as TimePro
+from models.DeepEDM.models.deepedm import DeepEDM
+from models.SimpleTM.models.SimpleTM import SimpleTM
+from models.TQNet.models.TQNet import Model as TQNet
+from models.ModernTCN.models.ModernTCN import Model as ModernTCN
+from models.FilterNet.models.filternet import FilterNet
+from models.NFM.Forecasting.NFM_FC import NFM
+from models.TimeKAN.models.TimeKAN import TimeKAN
+from models.SOFTS.models.SOFTS import Model as SOFTS
 
 
 # --- 3. 定义核心评测函数 (优化稳健版) ---
