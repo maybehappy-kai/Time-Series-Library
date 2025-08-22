@@ -28,13 +28,7 @@ torch.set_num_threads(1)
 warnings.filterwarnings("ignore")
 
 # --- 2. 导入所有需要测试的模型 ---
-from models.model_wrappers import TimeFilter, CONTIME, S_D_Mamba, TimePro, DeepEDM, SimpleTM, ModernTCN, NFM, TimeKAN, \
-    FilterNet
-from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
-from models.LinOSS.models.LinOSS import LinOSS
-from models.TQNet.models.TQNet import Model as TQNet
 from pypots.imputation import TimeMixerPP
-from models.SOFTS.models.SOFTS import Model as SOFTS
 from models.DLinear import Model as DLinear
 from models.PatchTST import Model as PatchTST
 from models.iTransformer import Model as iTransformer
