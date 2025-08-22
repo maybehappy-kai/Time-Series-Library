@@ -1,0 +1,555 @@
+Setting seed to 2021
+{'activation_fn': 'selu',
+ 'add_pe': True,
+ 'augmentation_ratio': 0,
+ 'batch_size': 8,
+ 'checkpoints': './checkpoints',
+ 'clip_grad_norm': 1.0,
+ 'condor_job': True,
+ 'data': 'custom',
+ 'data_path': 'national_illness.csv',
+ 'delay': 9,
+ 'des': 'test',
+ 'devices': '0,1',
+ 'dist_projection_dim': -1,
+ 'edm_dropout': 0.1,
+ 'embed': 'timeF',
+ 'features': 'M',
+ 'freq': 'h',
+ 'gpu': 0,
+ 'inverse': False,
+ 'is_training': 1,
+ 'itr': 1,
+ 'label_len': 48,
+ 'latent_channel_dim': -1,
+ 'learning_rate': 0.0005,
+ 'loss': 'mae_tdt',
+ 'loss_type': 'mae',
+ 'lradj': 'custom',
+ 'min_lr': 0.0002,
+ 'mlp_dropout': 0.1,
+ 'model': 'DeepEDM',
+ 'model_config': {'edm_params': {'activation_fn': 'selu',
+                                 'add_pe': True,
+                                 'delay': 9,
+                                 'dist_projection_dim': 64,
+                                 'dropout': 0.1,
+                                 'layer_norm': True,
+                                 'method': 'simplex',
+                                 'n_proj_layers': 1,
+                                 'theta': 1.0,
+                                 'time_delay_stride': 1},
+                  'encoder_params': {'activation_fn': 'selu',
+                                     'add_pe': True,
+                                     'dropout': 0.1,
+                                     'in_channels': 7,
+                                     'latent_channel_dim': 7,
+                                     'mlp_layers': 3,
+                                     'use_encoder': False},
+                  'lookback_len': 120,
+                  'n_edm_blocks': 3,
+                  'out_pred_len': 60,
+                  'type': 'EDM'},
+ 'model_id': 'ili_rerun_2021',
+ 'n_edm_blocks': 3,
+ 'n_mlp_layers': 3,
+ 'n_proj_layers': -1,
+ 'num_workers': 4,
+ 'opt': {'clip_grad_norm': 1.0,
+         'early_stopping_patience': 30,
+         'epochs': 100,
+         'learning_rate': 0.0005,
+         'min_lr': 0.0002,
+         'reduce_lr_factor': 0.9,
+         'schedule_type': 'custom',
+         'type': 'AdamW',
+         'weight_decay': 1e-05},
+ 'output_dir': '.',
+ 'patience': 45,
+ 'pred_len': 60,
+ 'reduce_lr_factor': 0.9,
+ 'root_path': './dataset/illness',
+ 'seasonal_patterns': 'Monthly',
+ 'seed': 2021,
+ 'seq_len': 120,
+ 'target': 'OT',
+ 'task_name': 'long_term_forecast',
+ 'tdt_loss': True,
+ 'theta': -1,
+ 'time_delay_stride': 1,
+ 'train_epochs': 150,
+ 'use_amp': False,
+ 'use_dtw': False,
+ 'use_gpu': True,
+ 'use_multi_gpu': True}
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           ili_rerun_2021      Model:              DeepEDM             
+
+[1mData Loader[0m
+  Data:               custom              Root Path:          ./dataset/illness   
+  Data Path:          national_illness.csvFeatures:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints       
+
+[1mForecasting Task[0m
+  Seq Len:            120                 Label Len:          48                  
+  Pred Len:           60                  Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+[1mModel Parameters[0m
+
+[1mRun Parameters[0m
+  Num Workers:        4                   Itr:                1                   
+  Train Epochs:       150                 Batch Size:         8                   
+  Patience:           45                  Learning Rate:      0.0005              
+  Des:                test                Loss:               mae_tdt             
+  Lradj:              custom              Use Amp:            0                   
+
+[1mGPU[0m
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      1                   Devices:            0,1                 
+
+{'clip_grad_norm': 1.0,
+ 'early_stopping_patience': 30,
+ 'epochs': 100,
+ 'learning_rate': 0.0005,
+ 'min_lr': 0.0002,
+ 'reduce_lr_factor': 0.9,
+ 'schedule_type': 'custom',
+ 'type': 'AdamW',
+ 'weight_decay': 1e-05}
+
+{'edm_params': {'activation_fn': 'selu',
+                'add_pe': True,
+                'delay': 9,
+                'dist_projection_dim': 64,
+                'dropout': 0.1,
+                'layer_norm': True,
+                'method': 'simplex',
+                'n_proj_layers': 1,
+                'theta': 1.0,
+                'time_delay_stride': 1},
+ 'encoder_params': {'activation_fn': 'selu',
+                    'add_pe': True,
+                    'dropout': 0.1,
+                    'in_channels': 7,
+                    'latent_channel_dim': 7,
+                    'mlp_layers': 3,
+                    'use_encoder': False},
+ 'lookback_len': 120,
+ 'n_edm_blocks': 3,
+ 'out_pred_len': 60,
+ 'type': 'EDM'}
+
+model: Model(
+  (encoder): InputEncoder(
+    (mlp_projection): Sequential(
+      (0): Linear(in_features=120, out_features=60, bias=True)
+      (1): Dropout(p=0.1, inplace=False)
+      (2): SELU()
+      (3): Linear(in_features=60, out_features=60, bias=True)
+      (4): Dropout(p=0.1, inplace=False)
+      (5): SELU()
+      (6): Linear(in_features=60, out_features=60, bias=True)
+    )
+  )
+  (edm_blocks): ModuleList(
+    (0-2): 3 x EDM(
+      (activation_fn): SELU()
+      (projection): Sequential(
+        (0): Linear(in_features=9, out_features=64, bias=True)
+      )
+      (pe): LearnablePositionalEmbedding()
+      (ln1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+      (attn_dropout): Dropout(p=0.1, inplace=False)
+      (undelay): Sequential(
+        (0): Linear(in_features=522, out_features=60, bias=True)
+        (1): Dropout(p=0.1, inplace=False)
+        (2): SELU()
+        (3): Linear(in_features=60, out_features=60, bias=True)
+      )
+    )
+  )
+  (gate_edm): Linear(in_features=60, out_features=1, bias=True)
+)
+>>>>>>>start training : long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl120_ll48_pl60_emdtimeF_test_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 497
+val 38
+test 134
+Epoch: 1 cost time: 1.3296124935150146
+Vali Metrics: mse:0.2311, mae:0.3045
+Test Metrics: mse:2.573186, mae:1.0866239
+Epoch: 1, Steps: 62 | Train Loss: 0.3932160 Vali Loss: 0.2678156 Test Loss: 1.8299049
+Validation loss decreased (inf --> 0.267816).  Saving model ...
+Reducing learning rate to 0.000450
+Epoch: 2 cost time: 0.7501230239868164
+Vali Metrics: mse:0.2310, mae:0.3080
+Test Metrics: mse:2.365095, mae:1.0273694
+Epoch: 2, Steps: 62 | Train Loss: 0.3083781 Vali Loss: 0.2694888 Test Loss: 1.6962321
+EarlyStopping counter: 1 out of 45
+Reducing learning rate to 0.000405
+Epoch: 3 cost time: 0.8865416049957275
+Vali Metrics: mse:0.2497, mae:0.3109
+Test Metrics: mse:2.291791, mae:1.0023879
+Epoch: 3, Steps: 62 | Train Loss: 0.2825691 Vali Loss: 0.2803173 Test Loss: 1.6470895
+EarlyStopping counter: 2 out of 45
+Reducing learning rate to 0.000365
+Epoch: 4 cost time: 0.7890768051147461
+Vali Metrics: mse:0.2283, mae:0.3093
+Test Metrics: mse:2.103353, mae:0.9400732
+Epoch: 4, Steps: 62 | Train Loss: 0.2672565 Vali Loss: 0.2688285 Test Loss: 1.5217129
+EarlyStopping counter: 3 out of 45
+Reducing learning rate to 0.000328
+Epoch: 5 cost time: 0.7666032314300537
+Vali Metrics: mse:0.2188, mae:0.2953
+Test Metrics: mse:2.02991, mae:0.9170433
+Epoch: 5, Steps: 62 | Train Loss: 0.2560989 Vali Loss: 0.2570461 Test Loss: 1.4734765
+Validation loss decreased (0.267816 --> 0.257046).  Saving model ...
+Reducing learning rate to 0.000295
+Epoch: 6 cost time: 0.7811992168426514
+Vali Metrics: mse:0.2326, mae:0.3092
+Test Metrics: mse:2.036737, mae:0.9179987
+Epoch: 6, Steps: 62 | Train Loss: 0.2478671 Vali Loss: 0.2709063 Test Loss: 1.4773681
+EarlyStopping counter: 1 out of 45
+Reducing learning rate to 0.000266
+Epoch: 7 cost time: 0.7723128795623779
+Vali Metrics: mse:0.2203, mae:0.2980
+Test Metrics: mse:1.963426, mae:0.9006280
+Epoch: 7, Steps: 62 | Train Loss: 0.2403501 Vali Loss: 0.2591348 Test Loss: 1.4320272
+EarlyStopping counter: 2 out of 45
+Reducing learning rate to 0.000239
+Epoch: 8 cost time: 0.756248950958252
+Vali Metrics: mse:0.2235, mae:0.3062
+Test Metrics: mse:1.8464, mae:0.8644844
+Epoch: 8, Steps: 62 | Train Loss: 0.2348094 Vali Loss: 0.2648329 Test Loss: 1.3554425
+EarlyStopping counter: 3 out of 45
+Reducing learning rate to 0.000215
+Epoch: 9 cost time: 0.761082649230957
+Vali Metrics: mse:0.2218, mae:0.3122
+Test Metrics: mse:1.906101, mae:0.8764846
+Epoch: 9, Steps: 62 | Train Loss: 0.2298015 Vali Loss: 0.2669850 Test Loss: 1.3912926
+EarlyStopping counter: 4 out of 45
+Reducing learning rate to 0.000200
+Epoch: 10 cost time: 0.7749733924865723
+Vali Metrics: mse:0.2183, mae:0.3212
+Test Metrics: mse:1.810537, mae:0.8512932
+Epoch: 10, Steps: 62 | Train Loss: 0.2253239 Vali Loss: 0.2697625 Test Loss: 1.3309150
+EarlyStopping counter: 5 out of 45
+Epoch: 11 cost time: 0.8092267513275146
+Vali Metrics: mse:0.2154, mae:0.3009
+Test Metrics: mse:1.849525, mae:0.8665452
+Epoch: 11, Steps: 62 | Train Loss: 0.2227776 Vali Loss: 0.2581502 Test Loss: 1.3580351
+EarlyStopping counter: 6 out of 45
+Epoch: 12 cost time: 0.7467577457427979
+Vali Metrics: mse:0.2214, mae:0.3096
+Test Metrics: mse:1.845508, mae:0.8632439
+Epoch: 12, Steps: 62 | Train Loss: 0.2196267 Vali Loss: 0.2655062 Test Loss: 1.3543761
+EarlyStopping counter: 7 out of 45
+Epoch: 13 cost time: 0.7493822574615479
+Vali Metrics: mse:0.2136, mae:0.2995
+Test Metrics: mse:1.724947, mae:0.8200453
+Epoch: 13, Steps: 62 | Train Loss: 0.2178884 Vali Loss: 0.2565427 Test Loss: 1.2724961
+Validation loss decreased (0.257046 --> 0.256543).  Saving model ...
+Epoch: 14 cost time: 0.7960999011993408
+Vali Metrics: mse:0.2064, mae:0.2940
+Test Metrics: mse:1.781414, mae:0.8378916
+Epoch: 14, Steps: 62 | Train Loss: 0.2143223 Vali Loss: 0.2502203 Test Loss: 1.3096530
+Validation loss decreased (0.256543 --> 0.250220).  Saving model ...
+Epoch: 15 cost time: 0.8369290828704834
+Vali Metrics: mse:0.2232, mae:0.3211
+Test Metrics: mse:1.747687, mae:0.8265136
+Epoch: 15, Steps: 62 | Train Loss: 0.2121939 Vali Loss: 0.2721598 Test Loss: 1.2871002
+EarlyStopping counter: 1 out of 45
+Epoch: 16 cost time: 0.8111131191253662
+Vali Metrics: mse:0.2097, mae:0.2884
+Test Metrics: mse:1.720176, mae:0.8187095
+Epoch: 16, Steps: 62 | Train Loss: 0.2093296 Vali Loss: 0.2490384 Test Loss: 1.2694426
+Validation loss decreased (0.250220 --> 0.249038).  Saving model ...
+Epoch: 17 cost time: 0.7616558074951172
+Vali Metrics: mse:0.2154, mae:0.3037
+Test Metrics: mse:1.737826, mae:0.8217154
+Epoch: 17, Steps: 62 | Train Loss: 0.2078440 Vali Loss: 0.2595331 Test Loss: 1.2797706
+EarlyStopping counter: 1 out of 45
+Epoch: 18 cost time: 0.7683670520782471
+Vali Metrics: mse:0.2037, mae:0.2907
+Test Metrics: mse:1.734133, mae:0.8254946
+Epoch: 18, Steps: 62 | Train Loss: 0.2048664 Vali Loss: 0.2471853 Test Loss: 1.2798140
+Validation loss decreased (0.249038 --> 0.247185).  Saving model ...
+Epoch: 19 cost time: 0.7727789878845215
+Vali Metrics: mse:0.2128, mae:0.3077
+Test Metrics: mse:1.705948, mae:0.8228067
+Epoch: 19, Steps: 62 | Train Loss: 0.2035749 Vali Loss: 0.2602580 Test Loss: 1.2643775
+EarlyStopping counter: 1 out of 45
+Epoch: 20 cost time: 0.7791955471038818
+Vali Metrics: mse:0.2108, mae:0.3031
+Test Metrics: mse:1.681564, mae:0.8107145
+Epoch: 20, Steps: 62 | Train Loss: 0.2021296 Vali Loss: 0.2569558 Test Loss: 1.2461392
+EarlyStopping counter: 2 out of 45
+Epoch: 21 cost time: 0.7513964176177979
+Vali Metrics: mse:0.2165, mae:0.3054
+Test Metrics: mse:1.670919, mae:0.8086478
+Epoch: 21, Steps: 62 | Train Loss: 0.2006340 Vali Loss: 0.2609300 Test Loss: 1.2397835
+EarlyStopping counter: 3 out of 45
+Epoch: 22 cost time: 0.7502076625823975
+Vali Metrics: mse:0.2129, mae:0.3130
+Test Metrics: mse:1.641686, mae:0.7996546
+Epoch: 22, Steps: 62 | Train Loss: 0.1984934 Vali Loss: 0.2629780 Test Loss: 1.2206702
+EarlyStopping counter: 4 out of 45
+Epoch: 23 cost time: 0.7282195091247559
+Vali Metrics: mse:0.2110, mae:0.3138
+Test Metrics: mse:1.626502, mae:0.7939087
+Epoch: 23, Steps: 62 | Train Loss: 0.1955454 Vali Loss: 0.2624030 Test Loss: 1.2102051
+EarlyStopping counter: 5 out of 45
+Epoch: 24 cost time: 0.8048818111419678
+Vali Metrics: mse:0.2176, mae:0.3110
+Test Metrics: mse:1.63348, mae:0.8011287
+Epoch: 24, Steps: 62 | Train Loss: 0.1949722 Vali Loss: 0.2642739 Test Loss: 1.2173046
+EarlyStopping counter: 6 out of 45
+Epoch: 25 cost time: 0.7915234565734863
+Vali Metrics: mse:0.2157, mae:0.3066
+Test Metrics: mse:1.656345, mae:0.8073279
+Epoch: 25, Steps: 62 | Train Loss: 0.1937375 Vali Loss: 0.2611562 Test Loss: 1.2318364
+EarlyStopping counter: 7 out of 45
+Epoch: 26 cost time: 0.7834920883178711
+Vali Metrics: mse:0.2091, mae:0.2990
+Test Metrics: mse:1.64825, mae:0.8040779
+Epoch: 26, Steps: 62 | Train Loss: 0.1917995 Vali Loss: 0.2540646 Test Loss: 1.2261641
+EarlyStopping counter: 8 out of 45
+Epoch: 27 cost time: 0.7481191158294678
+Vali Metrics: mse:0.2002, mae:0.2854
+Test Metrics: mse:1.635975, mae:0.8039165
+Epoch: 27, Steps: 62 | Train Loss: 0.1906288 Vali Loss: 0.2427811 Test Loss: 1.2199458
+Validation loss decreased (0.247185 --> 0.242781).  Saving model ...
+Epoch: 28 cost time: 0.7542564868927002
+Vali Metrics: mse:0.2134, mae:0.2970
+Test Metrics: mse:1.660591, mae:0.8096421
+Epoch: 28, Steps: 62 | Train Loss: 0.1897105 Vali Loss: 0.2551974 Test Loss: 1.2351165
+EarlyStopping counter: 1 out of 45
+Epoch: 29 cost time: 0.78125
+Vali Metrics: mse:0.2126, mae:0.3030
+Test Metrics: mse:1.605749, mae:0.7983081
+Epoch: 29, Steps: 62 | Train Loss: 0.1892552 Vali Loss: 0.2577997 Test Loss: 1.2020285
+EarlyStopping counter: 2 out of 45
+Epoch: 30 cost time: 0.7751104831695557
+Vali Metrics: mse:0.2219, mae:0.3113
+Test Metrics: mse:1.650148, mae:0.8065284
+Epoch: 30, Steps: 62 | Train Loss: 0.1872206 Vali Loss: 0.2666070 Test Loss: 1.2283380
+EarlyStopping counter: 3 out of 45
+Epoch: 31 cost time: 0.8233804702758789
+Vali Metrics: mse:0.2375, mae:0.3348
+Test Metrics: mse:1.566577, mae:0.7838876
+Epoch: 31, Steps: 62 | Train Loss: 0.1859379 Vali Loss: 0.2861396 Test Loss: 1.1752322
+EarlyStopping counter: 4 out of 45
+Epoch: 32 cost time: 0.7720625400543213
+Vali Metrics: mse:0.2325, mae:0.3273
+Test Metrics: mse:1.632648, mae:0.8066779
+Epoch: 32, Steps: 62 | Train Loss: 0.1850001 Vali Loss: 0.2799401 Test Loss: 1.2196629
+EarlyStopping counter: 5 out of 45
+Epoch: 33 cost time: 0.7608087062835693
+Vali Metrics: mse:0.2175, mae:0.3070
+Test Metrics: mse:1.623376, mae:0.8097914
+Epoch: 33, Steps: 62 | Train Loss: 0.1837615 Vali Loss: 0.2622743 Test Loss: 1.2165837
+EarlyStopping counter: 6 out of 45
+Epoch: 34 cost time: 0.7414047718048096
+Vali Metrics: mse:0.2195, mae:0.3199
+Test Metrics: mse:1.605185, mae:0.7969332
+Epoch: 34, Steps: 62 | Train Loss: 0.1826810 Vali Loss: 0.2697267 Test Loss: 1.2010591
+EarlyStopping counter: 7 out of 45
+Epoch: 35 cost time: 0.7440783977508545
+Vali Metrics: mse:0.2155, mae:0.2991
+Test Metrics: mse:1.58853, mae:0.7928650
+Epoch: 35, Steps: 62 | Train Loss: 0.1813514 Vali Loss: 0.2572744 Test Loss: 1.1906977
+EarlyStopping counter: 8 out of 45
+Epoch: 36 cost time: 0.7507352828979492
+Vali Metrics: mse:0.2329, mae:0.3283
+Test Metrics: mse:1.566279, mae:0.7877796
+Epoch: 36, Steps: 62 | Train Loss: 0.1807938 Vali Loss: 0.2805912 Test Loss: 1.1770293
+EarlyStopping counter: 9 out of 45
+Epoch: 37 cost time: 0.812938928604126
+Vali Metrics: mse:0.2340, mae:0.3292
+Test Metrics: mse:1.579822, mae:0.7913203
+Epoch: 37, Steps: 62 | Train Loss: 0.1795796 Vali Loss: 0.2815881 Test Loss: 1.1855712
+EarlyStopping counter: 10 out of 45
+Epoch: 38 cost time: 0.767627477645874
+Vali Metrics: mse:0.2036, mae:0.2956
+Test Metrics: mse:1.559886, mae:0.7853564
+Epoch: 38, Steps: 62 | Train Loss: 0.1788224 Vali Loss: 0.2495804 Test Loss: 1.1726214
+EarlyStopping counter: 11 out of 45
+Epoch: 39 cost time: 0.760775089263916
+Vali Metrics: mse:0.2304, mae:0.3256
+Test Metrics: mse:1.577504, mae:0.7948306
+Epoch: 39, Steps: 62 | Train Loss: 0.1780566 Vali Loss: 0.2779873 Test Loss: 1.1861672
+EarlyStopping counter: 12 out of 45
+Epoch: 40 cost time: 0.7708501815795898
+Vali Metrics: mse:0.2244, mae:0.3197
+Test Metrics: mse:1.558316, mae:0.7989584
+Epoch: 40, Steps: 62 | Train Loss: 0.1766391 Vali Loss: 0.2720103 Test Loss: 1.1786373
+EarlyStopping counter: 13 out of 45
+Epoch: 41 cost time: 0.8066892623901367
+Vali Metrics: mse:0.2276, mae:0.3077
+Test Metrics: mse:1.518165, mae:0.7795057
+Epoch: 41, Steps: 62 | Train Loss: 0.1760542 Vali Loss: 0.2676551 Test Loss: 1.1488352
+EarlyStopping counter: 14 out of 45
+Epoch: 42 cost time: 0.7854030132293701
+Vali Metrics: mse:0.2121, mae:0.3006
+Test Metrics: mse:1.5469, mae:0.7891317
+Epoch: 42, Steps: 62 | Train Loss: 0.1753572 Vali Loss: 0.2563605 Test Loss: 1.1680160
+EarlyStopping counter: 15 out of 45
+Epoch: 43 cost time: 0.7817637920379639
+Vali Metrics: mse:0.2140, mae:0.3027
+Test Metrics: mse:1.558543, mae:0.7902127
+Epoch: 43, Steps: 62 | Train Loss: 0.1745256 Vali Loss: 0.2583666 Test Loss: 1.1743778
+EarlyStopping counter: 16 out of 45
+Epoch: 44 cost time: 0.805757999420166
+Vali Metrics: mse:0.2476, mae:0.3446
+Test Metrics: mse:1.555081, mae:0.7891752
+Epoch: 44, Steps: 62 | Train Loss: 0.1736358 Vali Loss: 0.2960927 Test Loss: 1.1721280
+EarlyStopping counter: 17 out of 45
+Epoch: 45 cost time: 0.7536349296569824
+Vali Metrics: mse:0.2233, mae:0.3114
+Test Metrics: mse:1.56919, mae:0.8055658
+Epoch: 45, Steps: 62 | Train Loss: 0.1732017 Vali Loss: 0.2673651 Test Loss: 1.1873777
+EarlyStopping counter: 18 out of 45
+Epoch: 46 cost time: 0.744553804397583
+Vali Metrics: mse:0.2231, mae:0.3094
+Test Metrics: mse:1.552564, mae:0.7901778
+Epoch: 46, Steps: 62 | Train Loss: 0.1715679 Vali Loss: 0.2662283 Test Loss: 1.1713709
+EarlyStopping counter: 19 out of 45
+Epoch: 47 cost time: 0.760434627532959
+Vali Metrics: mse:0.2475, mae:0.3408
+Test Metrics: mse:1.598968, mae:0.8025830
+Epoch: 47, Steps: 62 | Train Loss: 0.1708924 Vali Loss: 0.2941638 Test Loss: 1.2007754
+EarlyStopping counter: 20 out of 45
+Epoch: 48 cost time: 0.7948617935180664
+Vali Metrics: mse:0.2570, mae:0.3504
+Test Metrics: mse:1.554763, mae:0.7894731
+Epoch: 48, Steps: 62 | Train Loss: 0.1707521 Vali Loss: 0.3036638 Test Loss: 1.1721179
+EarlyStopping counter: 21 out of 45
+Epoch: 49 cost time: 0.7544586658477783
+Vali Metrics: mse:0.2183, mae:0.3127
+Test Metrics: mse:1.59252, mae:0.8130161
+Epoch: 49, Steps: 62 | Train Loss: 0.1698609 Vali Loss: 0.2654773 Test Loss: 1.2027682
+EarlyStopping counter: 22 out of 45
+Epoch: 50 cost time: 0.7985055446624756
+Vali Metrics: mse:0.2372, mae:0.3246
+Test Metrics: mse:1.559488, mae:0.7996916
+Epoch: 50, Steps: 62 | Train Loss: 0.1686998 Vali Loss: 0.2808654 Test Loss: 1.1795897
+EarlyStopping counter: 23 out of 45
+Epoch: 51 cost time: 0.7646181583404541
+Vali Metrics: mse:0.2379, mae:0.3192
+Test Metrics: mse:1.626033, mae:0.8182126
+Epoch: 51, Steps: 62 | Train Loss: 0.1684655 Vali Loss: 0.2785347 Test Loss: 1.2221230
+EarlyStopping counter: 24 out of 45
+Epoch: 52 cost time: 0.8036572933197021
+Vali Metrics: mse:0.2381, mae:0.3178
+Test Metrics: mse:1.586794, mae:0.8106164
+Epoch: 52, Steps: 62 | Train Loss: 0.1675601 Vali Loss: 0.2779533 Test Loss: 1.1987051
+EarlyStopping counter: 25 out of 45
+Epoch: 53 cost time: 0.7504010200500488
+Vali Metrics: mse:0.2400, mae:0.3288
+Test Metrics: mse:1.619437, mae:0.8261030
+Epoch: 53, Steps: 62 | Train Loss: 0.1668876 Vali Loss: 0.2844148 Test Loss: 1.2227700
+EarlyStopping counter: 26 out of 45
+Epoch: 54 cost time: 0.737494945526123
+Vali Metrics: mse:0.2579, mae:0.3442
+Test Metrics: mse:1.62839, mae:0.8270192
+Epoch: 54, Steps: 62 | Train Loss: 0.1660119 Vali Loss: 0.3010901 Test Loss: 1.2277044
+EarlyStopping counter: 27 out of 45
+Epoch: 55 cost time: 0.7582252025604248
+Vali Metrics: mse:0.2540, mae:0.3336
+Test Metrics: mse:1.576833, mae:0.8073433
+Epoch: 55, Steps: 62 | Train Loss: 0.1654430 Vali Loss: 0.2938406 Test Loss: 1.1920884
+EarlyStopping counter: 28 out of 45
+Epoch: 56 cost time: 0.7870848178863525
+Vali Metrics: mse:0.2285, mae:0.3116
+Test Metrics: mse:1.602698, mae:0.8097755
+Epoch: 56, Steps: 62 | Train Loss: 0.1643857 Vali Loss: 0.2700616 Test Loss: 1.2062367
+EarlyStopping counter: 29 out of 45
+Epoch: 57 cost time: 0.7631745338439941
+Vali Metrics: mse:0.2458, mae:0.3312
+Test Metrics: mse:1.604102, mae:0.8212936
+Epoch: 57, Steps: 62 | Train Loss: 0.1642236 Vali Loss: 0.2884979 Test Loss: 1.2126980
+EarlyStopping counter: 30 out of 45
+Epoch: 58 cost time: 0.751776933670044
+Vali Metrics: mse:0.2499, mae:0.3268
+Test Metrics: mse:1.680917, mae:0.8437780
+Epoch: 58, Steps: 62 | Train Loss: 0.1636574 Vali Loss: 0.2883567 Test Loss: 1.2623476
+EarlyStopping counter: 31 out of 45
+Epoch: 59 cost time: 0.7683548927307129
+Vali Metrics: mse:0.2436, mae:0.3298
+Test Metrics: mse:1.655737, mae:0.8329698
+Epoch: 59, Steps: 62 | Train Loss: 0.1630832 Vali Loss: 0.2866881 Test Loss: 1.2443534
+EarlyStopping counter: 32 out of 45
+Epoch: 60 cost time: 0.7993021011352539
+Vali Metrics: mse:0.2541, mae:0.3381
+Test Metrics: mse:1.639746, mae:0.8207906
+Epoch: 60, Steps: 62 | Train Loss: 0.1629508 Vali Loss: 0.2960968 Test Loss: 1.2302684
+EarlyStopping counter: 33 out of 45
+Epoch: 61 cost time: 0.7837531566619873
+Vali Metrics: mse:0.2545, mae:0.3384
+Test Metrics: mse:1.697112, mae:0.8381035
+Epoch: 61, Steps: 62 | Train Loss: 0.1623465 Vali Loss: 0.2964673 Test Loss: 1.2676077
+EarlyStopping counter: 34 out of 45
+Epoch: 62 cost time: 0.8104135990142822
+Vali Metrics: mse:0.2408, mae:0.3180
+Test Metrics: mse:1.618796, mae:0.8203607
+Epoch: 62, Steps: 62 | Train Loss: 0.1620040 Vali Loss: 0.2794095 Test Loss: 1.2195781
+EarlyStopping counter: 35 out of 45
+Epoch: 63 cost time: 0.7563667297363281
+Vali Metrics: mse:0.2540, mae:0.3336
+Test Metrics: mse:1.669716, mae:0.8429836
+Epoch: 63, Steps: 62 | Train Loss: 0.1603070 Vali Loss: 0.2937886 Test Loss: 1.2563500
+EarlyStopping counter: 36 out of 45
+Epoch: 64 cost time: 0.7613599300384521
+Vali Metrics: mse:0.2620, mae:0.3346
+Test Metrics: mse:1.71034, mae:0.8460727
+Epoch: 64, Steps: 62 | Train Loss: 0.1611424 Vali Loss: 0.2982749 Test Loss: 1.2782066
+EarlyStopping counter: 37 out of 45
+Epoch: 65 cost time: 0.7463159561157227
+Vali Metrics: mse:0.2681, mae:0.3445
+Test Metrics: mse:1.743125, mae:0.8654492
+Epoch: 65, Steps: 62 | Train Loss: 0.1598575 Vali Loss: 0.3062655 Test Loss: 1.3042870
+EarlyStopping counter: 38 out of 45
+Epoch: 66 cost time: 0.7721443176269531
+Vali Metrics: mse:0.2410, mae:0.3210
+Test Metrics: mse:1.668343, mae:0.8369032
+Epoch: 66, Steps: 62 | Train Loss: 0.1596133 Vali Loss: 0.2809755 Test Loss: 1.2526231
+EarlyStopping counter: 39 out of 45
+Epoch: 67 cost time: 0.7654514312744141
+Vali Metrics: mse:0.2530, mae:0.3327
+Test Metrics: mse:1.697591, mae:0.8458918
+Epoch: 67, Steps: 62 | Train Loss: 0.1595447 Vali Loss: 0.2928252 Test Loss: 1.2717414
+EarlyStopping counter: 40 out of 45
+Epoch: 68 cost time: 0.8024461269378662
+Vali Metrics: mse:0.2678, mae:0.3529
+Test Metrics: mse:1.815753, mae:0.8656014
+Epoch: 68, Steps: 62 | Train Loss: 0.1583744 Vali Loss: 0.3103328 Test Loss: 1.3406773
+EarlyStopping counter: 41 out of 45
+Epoch: 69 cost time: 0.7989091873168945
+Vali Metrics: mse:0.2441, mae:0.3314
+Test Metrics: mse:1.80593, mae:0.8648534
+Epoch: 69, Steps: 62 | Train Loss: 0.1588468 Vali Loss: 0.2877651 Test Loss: 1.3353918
+EarlyStopping counter: 42 out of 45
+Epoch: 70 cost time: 0.7727601528167725
+Vali Metrics: mse:0.2624, mae:0.3355
+Test Metrics: mse:1.771266, mae:0.8569208
+Epoch: 70, Steps: 62 | Train Loss: 0.1584234 Vali Loss: 0.2989863 Test Loss: 1.3140932
+EarlyStopping counter: 43 out of 45
+Epoch: 71 cost time: 0.7946474552154541
+Vali Metrics: mse:0.2632, mae:0.3395
+Test Metrics: mse:1.76988, mae:0.8498873
+Epoch: 71, Steps: 62 | Train Loss: 0.1575869 Vali Loss: 0.3013729 Test Loss: 1.3098835
+EarlyStopping counter: 44 out of 45
+Epoch: 72 cost time: 0.7886190414428711
+Vali Metrics: mse:0.2655, mae:0.3371
+Test Metrics: mse:1.711408, mae:0.8577026
+Epoch: 72, Steps: 62 | Train Loss: 0.1564569 Vali Loss: 0.3013138 Test Loss: 1.2845554
+EarlyStopping counter: 45 out of 45
+Early stopping
+loading model, best model path: ./checkpoints/long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl120_ll48_pl60_emdtimeF_test_0/checkpoint.pth
+>>>>>>>testing : long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl120_ll48_pl60_emdtimeF_test_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 134
+test shape: (134, 60, 7) (134, 60, 7)
+mse:1.6379836797714233, mae:0.8051435351371765, dtw:not calculated

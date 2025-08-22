@@ -1,0 +1,107 @@
+long_term_forecast_ETTh1_rerun_2021_DeepEDM_ETTh1_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.3589349091053009, mae:0.382638156414032, dtw:not calculated
+
+long_term_forecast_ETTh1_rerun_2021_DeepEDM_ETTh1_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.38611653447151184, mae:0.3972475826740265, dtw:not calculated
+
+long_term_forecast_ETTh1_rerun_2021_DeepEDM_ETTh1_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.4034472107887268, mae:0.4173082709312439, dtw:not calculated
+
+long_term_forecast_ETTh1_rerun_2021_DeepEDM_ETTh1_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.32259541749954224, mae:0.3562546670436859, dtw:not calculated
+
+long_term_forecast_ETTh2_rerun_2021_DeepEDM_ETTh2_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.28653424978256226, mae:0.3316897749900818, dtw:not calculated
+
+long_term_forecast_ETTh2_rerun_2021_DeepEDM_ETTh2_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.321723073720932, mae:0.3605273962020874, dtw:not calculated
+
+long_term_forecast_ETTh2_rerun_2021_DeepEDM_ETTh2_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.3450239598751068, mae:0.3741249442100525, dtw:not calculated
+
+long_term_forecast_ETTh2_rerun_2021_DeepEDM_ETTh2_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.22313743829727173, mae:0.2864026129245758, dtw:not calculated
+
+long_term_forecast_ETTm1_rerun_2021_DeepEDM_ETTm1_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.2882356345653534, mae:0.3279782831668854, dtw:not calculated
+
+long_term_forecast_ETTm1_rerun_2021_DeepEDM_ETTm1_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.30421140789985657, mae:0.34313392639160156, dtw:not calculated
+
+long_term_forecast_ETTm1_rerun_2021_DeepEDM_ETTm1_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.31995609402656555, mae:0.3523670732975006, dtw:not calculated
+
+long_term_forecast_ETTm1_rerun_2021_DeepEDM_ETTm1_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.27823764085769653, mae:0.3194562792778015, dtw:not calculated
+
+long_term_forecast_ETTm2_rerun_2021_DeepEDM_ETTm2_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.1686931848526001, mae:0.2477077692747116, dtw:not calculated
+
+long_term_forecast_ETTm2_rerun_2021_DeepEDM_ETTm2_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.1964799165725708, mae:0.268399715423584, dtw:not calculated
+
+long_term_forecast_ETTm2_rerun_2021_DeepEDM_ETTm2_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.22034263610839844, mae:0.2868594527244568, dtw:not calculated
+
+long_term_forecast_ETTm2_rerun_2021_DeepEDM_ETTm2_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.13229812681674957, mae:0.22041872143745422, dtw:not calculated
+
+long_term_forecast_ECL_rerun_2021_DeepEDM_custom_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.13726067543029785, mae:0.23146161437034607, dtw:not calculated
+
+long_term_forecast_ECL_rerun_2021_DeepEDM_custom_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.1446249932050705, mae:0.23805750906467438, dtw:not calculated
+
+long_term_forecast_ECL_rerun_2021_DeepEDM_custom_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.1510281264781952, mae:0.24360345304012299, dtw:not calculated
+
+long_term_forecast_ECL_rerun_2021_DeepEDM_custom_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.1625209003686905, mae:0.24925971031188965, dtw:not calculated
+
+long_term_forecast_Traffic_rerun_2021_DeepEDM_custom_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.3836304843425751, mae:0.25930875539779663, dtw:not calculated
+
+long_term_forecast_Traffic_rerun_2021_DeepEDM_custom_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.3802109658718109, mae:0.2575637698173523, dtw:not calculated
+
+long_term_forecast_Traffic_rerun_2021_DeepEDM_custom_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.38885796070098877, mae:0.2637804448604584, dtw:not calculated
+
+long_term_forecast_Traffic_rerun_2021_DeepEDM_custom_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.4473455846309662, mae:0.2846837341785431, dtw:not calculated
+
+long_term_forecast_exchange_rerun_2021_DeepEDM_custom_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.08452703058719635, mae:0.20225073397159576, dtw:not calculated
+
+long_term_forecast_exchange_rerun_2021_DeepEDM_custom_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.12594759464263916, mae:0.249746635556221, dtw:not calculated
+
+long_term_forecast_exchange_rerun_2021_DeepEDM_custom_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.1805950552225113, mae:0.3013639450073242, dtw:not calculated
+
+long_term_forecast_exchange_rerun_2021_DeepEDM_custom_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.042247094213962555, mae:0.14141486585140228, dtw:not calculated
+
+long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl120_ll48_pl60_emdtimeF_test_0  
+mse:1.6379836797714233, mae:0.8051435351371765, dtw:not calculated
+
+long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl48_ll48_pl24_emdtimeF_test_0  
+mse:1.6897001266479492, mae:0.7844298481941223, dtw:not calculated
+
+long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl72_ll48_pl36_emdtimeF_test_0  
+mse:1.6773737668991089, mae:0.7657243609428406, dtw:not calculated
+
+long_term_forecast_ili_rerun_2021_DeepEDM_custom_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:1.5696066617965698, mae:0.7842211127281189, dtw:not calculated
+
+long_term_forecast_weather_rerun_2021_DeepEDM_custom_ftM_sl192_ll48_pl96_emdtimeF_test_0  
+mse:0.15709002315998077, mae:0.19182921946048737, dtw:not calculated
+
+long_term_forecast_weather_rerun_2021_DeepEDM_custom_ftM_sl288_ll48_pl144_emdtimeF_test_0  
+mse:0.17349861562252045, mae:0.20904985070228577, dtw:not calculated
+
+long_term_forecast_weather_rerun_2021_DeepEDM_custom_ftM_sl384_ll48_pl192_emdtimeF_test_0  
+mse:0.19120536744594574, mae:0.22627392411231995, dtw:not calculated
+
+long_term_forecast_weather_rerun_2021_DeepEDM_custom_ftM_sl96_ll48_pl48_emdtimeF_test_0  
+mse:0.13875997066497803, mae:0.17022079229354858, dtw:not calculated

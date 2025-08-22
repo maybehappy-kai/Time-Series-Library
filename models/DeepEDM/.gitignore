@@ -1,0 +1,12 @@
+data/
+datasets/
+plots/*png
+**/__pycache__/
+dataset/
+checkpoints/
+configs/ablations/
+*.log
+results/
+test_results/
+m4_results/
+results_summary.csv

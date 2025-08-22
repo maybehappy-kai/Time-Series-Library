@@ -1,0 +1,305 @@
+Setting seed to 2021
+{'activation_fn': 'selu',
+ 'add_pe': True,
+ 'augmentation_ratio': 0,
+ 'batch_size': 32,
+ 'checkpoints': './checkpoints',
+ 'clip_grad_norm': 1.0,
+ 'condor_job': True,
+ 'data': 'ETTh2',
+ 'data_path': 'ETTh2.csv',
+ 'delay': 7,
+ 'des': 'test',
+ 'devices': '0,1',
+ 'dist_projection_dim': -1,
+ 'edm_dropout': 0.1,
+ 'embed': 'timeF',
+ 'features': 'M',
+ 'freq': 'h',
+ 'gpu': 0,
+ 'inverse': False,
+ 'is_training': 1,
+ 'itr': 1,
+ 'label_len': 48,
+ 'latent_channel_dim': -1,
+ 'learning_rate': 0.0005,
+ 'loss': 'mae_tdt',
+ 'loss_type': 'mae',
+ 'lradj': 'custom',
+ 'min_lr': 5e-05,
+ 'mlp_dropout': 0.1,
+ 'model': 'DeepEDM',
+ 'model_config': {'edm_params': {'activation_fn': 'selu',
+                                 'add_pe': True,
+                                 'delay': 7,
+                                 'dist_projection_dim': 64,
+                                 'dropout': 0.1,
+                                 'layer_norm': True,
+                                 'method': 'simplex',
+                                 'n_proj_layers': 1,
+                                 'theta': 1.0,
+                                 'time_delay_stride': 3},
+                  'encoder_params': {'activation_fn': 'selu',
+                                     'add_pe': True,
+                                     'dropout': 0.1,
+                                     'in_channels': 7,
+                                     'latent_channel_dim': 7,
+                                     'mlp_layers': 3,
+                                     'use_encoder': False},
+                  'lookback_len': 336,
+                  'n_edm_blocks': 3,
+                  'out_pred_len': 336,
+                  'type': 'EDM'},
+ 'model_id': 'ETTh2_rerun_lkbck_search_2021__2021',
+ 'n_edm_blocks': 3,
+ 'n_mlp_layers': 3,
+ 'n_proj_layers': -1,
+ 'num_workers': 4,
+ 'opt': {'clip_grad_norm': 1.0,
+         'early_stopping_patience': 30,
+         'epochs': 100,
+         'learning_rate': 0.0005,
+         'min_lr': 5e-05,
+         'reduce_lr_factor': 0.9,
+         'schedule_type': 'custom',
+         'type': 'AdamW',
+         'weight_decay': 1e-05},
+ 'output_dir': '.',
+ 'patience': 10,
+ 'pred_len': 336,
+ 'reduce_lr_factor': 0.9,
+ 'root_path': './dataset/ETT-small/',
+ 'seasonal_patterns': 'Monthly',
+ 'seed': 2021,
+ 'seq_len': 336,
+ 'target': 'OT',
+ 'task_name': 'long_term_forecast',
+ 'tdt_loss': True,
+ 'theta': -1,
+ 'time_delay_stride': 3,
+ 'train_epochs': 150,
+ 'use_amp': False,
+ 'use_dtw': False,
+ 'use_gpu': True,
+ 'use_multi_gpu': True}
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           ETTh2_rerun_lkbck_search_2021__2021Model:              DeepEDM             
+
+[1mData Loader[0m
+  Data:               ETTh2               Root Path:          ./dataset/ETT-small/
+  Data Path:          ETTh2.csv           Features:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints       
+
+[1mForecasting Task[0m
+  Seq Len:            336                 Label Len:          48                  
+  Pred Len:           336                 Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+[1mModel Parameters[0m
+
+[1mRun Parameters[0m
+  Num Workers:        4                   Itr:                1                   
+  Train Epochs:       150                 Batch Size:         32                  
+  Patience:           10                  Learning Rate:      0.0005              
+  Des:                test                Loss:               mae_tdt             
+  Lradj:              custom              Use Amp:            0                   
+
+[1mGPU[0m
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      1                   Devices:            0,1                 
+
+{'clip_grad_norm': 1.0,
+ 'early_stopping_patience': 30,
+ 'epochs': 100,
+ 'learning_rate': 0.0005,
+ 'min_lr': 5e-05,
+ 'reduce_lr_factor': 0.9,
+ 'schedule_type': 'custom',
+ 'type': 'AdamW',
+ 'weight_decay': 1e-05}
+
+{'edm_params': {'activation_fn': 'selu',
+                'add_pe': True,
+                'delay': 7,
+                'dist_projection_dim': 64,
+                'dropout': 0.1,
+                'layer_norm': True,
+                'method': 'simplex',
+                'n_proj_layers': 1,
+                'theta': 1.0,
+                'time_delay_stride': 3},
+ 'encoder_params': {'activation_fn': 'selu',
+                    'add_pe': True,
+                    'dropout': 0.1,
+                    'in_channels': 7,
+                    'latent_channel_dim': 7,
+                    'mlp_layers': 3,
+                    'use_encoder': False},
+ 'lookback_len': 336,
+ 'n_edm_blocks': 3,
+ 'out_pred_len': 336,
+ 'type': 'EDM'}
+
+model: Model(
+  (encoder): InputEncoder(
+    (mlp_projection): Sequential(
+      (0): Linear(in_features=336, out_features=336, bias=True)
+      (1): Dropout(p=0.1, inplace=False)
+      (2): SELU()
+      (3): Linear(in_features=336, out_features=336, bias=True)
+      (4): Dropout(p=0.1, inplace=False)
+      (5): SELU()
+      (6): Linear(in_features=336, out_features=336, bias=True)
+    )
+  )
+  (edm_blocks): ModuleList(
+    (0-2): 3 x EDM(
+      (activation_fn): SELU()
+      (projection): Sequential(
+        (0): Linear(in_features=7, out_features=64, bias=True)
+      )
+      (pe): LearnablePositionalEmbedding()
+      (ln1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+      (attn_dropout): Dropout(p=0.1, inplace=False)
+      (undelay): Sequential(
+        (0): Linear(in_features=763, out_features=336, bias=True)
+        (1): Dropout(p=0.1, inplace=False)
+        (2): SELU()
+        (3): Linear(in_features=336, out_features=336, bias=True)
+      )
+    )
+  )
+  (gate_edm): Linear(in_features=336, out_features=1, bias=True)
+)
+>>>>>>>start training : long_term_forecast_ETTh2_rerun_lkbck_search_2021__2021_DeepEDM_ETTh2_ftM_sl336_ll48_pl336_emdtimeF_test_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 7969
+val 2545
+test 2545
+	iters: 100, epoch: 1 | loss: 0.2822099
+	speed: 0.0632s/iter; left time: 2353.5839s
+	iters: 200, epoch: 1 | loss: 0.2817596
+	speed: 0.0470s/iter; left time: 1745.8248s
+Epoch: 1 cost time: 12.760215282440186
+Vali Metrics: mse:0.3753, mae:0.4182
+Test Metrics: mse:0.3561805, mae:0.3920570
+Epoch: 1, Steps: 249 | Train Loss: 0.3227665 Vali Loss: 0.3967406 Test Loss: 0.3741187
+Validation loss decreased (inf --> 0.396741).  Saving model ...
+Reducing learning rate to 0.000450
+	iters: 100, epoch: 2 | loss: 0.2908102
+	speed: 0.2182s/iter; left time: 8072.2668s
+	iters: 200, epoch: 2 | loss: 0.2981526
+	speed: 0.0390s/iter; left time: 1440.4738s
+Epoch: 2 cost time: 10.507308959960938
+Vali Metrics: mse:0.3753, mae:0.4140
+Test Metrics: mse:0.3669387, mae:0.3943713
+Epoch: 2, Steps: 249 | Train Loss: 0.2944338 Vali Loss: 0.3946559 Test Loss: 0.3806550
+Validation loss decreased (0.396741 --> 0.394656).  Saving model ...
+Reducing learning rate to 0.000405
+	iters: 100, epoch: 3 | loss: 0.2943893
+	speed: 0.2215s/iter; left time: 8141.1385s
+	iters: 200, epoch: 3 | loss: 0.2754117
+	speed: 0.0410s/iter; left time: 1502.1654s
+Epoch: 3 cost time: 11.152254104614258
+Vali Metrics: mse:0.3892, mae:0.4210
+Test Metrics: mse:0.3669575, mae:0.3949967
+Epoch: 3, Steps: 249 | Train Loss: 0.2810060 Vali Loss: 0.4050981 Test Loss: 0.3809771
+EarlyStopping counter: 1 out of 10
+Reducing learning rate to 0.000365
+	iters: 100, epoch: 4 | loss: 0.2320380
+	speed: 0.2233s/iter; left time: 8152.3195s
+	iters: 200, epoch: 4 | loss: 0.3191206
+	speed: 0.0283s/iter; left time: 1029.6660s
+Epoch: 4 cost time: 8.285117149353027
+Vali Metrics: mse:0.3933, mae:0.4257
+Test Metrics: mse:0.3927202, mae:0.4070334
+Epoch: 4, Steps: 249 | Train Loss: 0.2711685 Vali Loss: 0.4095197 Test Loss: 0.3998768
+EarlyStopping counter: 2 out of 10
+Reducing learning rate to 0.000328
+	iters: 100, epoch: 5 | loss: 0.2649823
+	speed: 0.2317s/iter; left time: 8402.0727s
+	iters: 200, epoch: 5 | loss: 0.2396082
+	speed: 0.0475s/iter; left time: 1717.2287s
+Epoch: 5 cost time: 12.192272901535034
+Vali Metrics: mse:0.3942, mae:0.4208
+Test Metrics: mse:0.3990397, mae:0.4152094
+Epoch: 5, Steps: 249 | Train Loss: 0.2635123 Vali Loss: 0.4074632 Test Loss: 0.4071245
+EarlyStopping counter: 3 out of 10
+Reducing learning rate to 0.000295
+	iters: 100, epoch: 6 | loss: 0.2337613
+	speed: 0.2032s/iter; left time: 7315.6351s
+	iters: 200, epoch: 6 | loss: 0.2709197
+	speed: 0.0358s/iter; left time: 1287.1534s
+Epoch: 6 cost time: 9.638839960098267
+Vali Metrics: mse:0.3873, mae:0.4193
+Test Metrics: mse:0.4016432, mae:0.4178088
+Epoch: 6, Steps: 249 | Train Loss: 0.2562131 Vali Loss: 0.4032837 Test Loss: 0.4097260
+EarlyStopping counter: 4 out of 10
+Reducing learning rate to 0.000266
+	iters: 100, epoch: 7 | loss: 0.2740236
+	speed: 0.2351s/iter; left time: 8407.4667s
+	iters: 200, epoch: 7 | loss: 0.2193987
+	speed: 0.0415s/iter; left time: 1481.4289s
+Epoch: 7 cost time: 10.634752750396729
+Vali Metrics: mse:0.3786, mae:0.4178
+Test Metrics: mse:0.3888873, mae:0.4141097
+Epoch: 7, Steps: 249 | Train Loss: 0.2512216 Vali Loss: 0.3981645 Test Loss: 0.4014985
+EarlyStopping counter: 5 out of 10
+Reducing learning rate to 0.000239
+	iters: 100, epoch: 8 | loss: 0.2839497
+	speed: 0.2079s/iter; left time: 7382.5109s
+	iters: 200, epoch: 8 | loss: 0.2742786
+	speed: 0.0476s/iter; left time: 1684.9154s
+Epoch: 8 cost time: 11.483594179153442
+Vali Metrics: mse:0.3768, mae:0.4176
+Test Metrics: mse:0.3974791, mae:0.4178911
+Epoch: 8, Steps: 249 | Train Loss: 0.2466938 Vali Loss: 0.3971829 Test Loss: 0.4076851
+EarlyStopping counter: 6 out of 10
+Reducing learning rate to 0.000215
+	iters: 100, epoch: 9 | loss: 0.2198625
+	speed: 0.2531s/iter; left time: 8925.7568s
+	iters: 200, epoch: 9 | loss: 0.2312965
+	speed: 0.0373s/iter; left time: 1311.6812s
+Epoch: 9 cost time: 10.451818704605103
+Vali Metrics: mse:0.3857, mae:0.4211
+Test Metrics: mse:0.3972507, mae:0.4179719
+Epoch: 9, Steps: 249 | Train Loss: 0.2432948 Vali Loss: 0.4033931 Test Loss: 0.4076113
+EarlyStopping counter: 7 out of 10
+Reducing learning rate to 0.000194
+	iters: 100, epoch: 10 | loss: 0.2525419
+	speed: 0.2199s/iter; left time: 7698.5737s
+	iters: 200, epoch: 10 | loss: 0.2103015
+	speed: 0.0467s/iter; left time: 1630.4292s
+Epoch: 10 cost time: 11.309524297714233
+Vali Metrics: mse:0.3853, mae:0.4218
+Test Metrics: mse:0.3978561, mae:0.4197383
+Epoch: 10, Steps: 249 | Train Loss: 0.2401981 Vali Loss: 0.4035497 Test Loss: 0.4087972
+EarlyStopping counter: 8 out of 10
+Reducing learning rate to 0.000174
+	iters: 100, epoch: 11 | loss: 0.2318164
+	speed: 0.2236s/iter; left time: 7774.2522s
+	iters: 200, epoch: 11 | loss: 0.2545817
+	speed: 0.0400s/iter; left time: 1385.6667s
+Epoch: 11 cost time: 10.108051300048828
+Vali Metrics: mse:0.3895, mae:0.4237
+Test Metrics: mse:0.3932951, mae:0.4185857
+Epoch: 11, Steps: 249 | Train Loss: 0.2376370 Vali Loss: 0.4066133 Test Loss: 0.4059404
+EarlyStopping counter: 9 out of 10
+Reducing learning rate to 0.000157
+	iters: 100, epoch: 12 | loss: 0.2141037
+	speed: 0.2117s/iter; left time: 7307.8573s
+	iters: 200, epoch: 12 | loss: 0.2332301
+	speed: 0.0457s/iter; left time: 1573.5622s
+Epoch: 12 cost time: 11.495769023895264
+Vali Metrics: mse:0.3906, mae:0.4238
+Test Metrics: mse:0.4066269, mae:0.4254123
+Epoch: 12, Steps: 249 | Train Loss: 0.2358341 Vali Loss: 0.4071783 Test Loss: 0.4160196
+EarlyStopping counter: 10 out of 10
+Early stopping
+loading model, best model path: ./checkpoints/long_term_forecast_ETTh2_rerun_lkbck_search_2021__2021_DeepEDM_ETTh2_ftM_sl336_ll48_pl336_emdtimeF_test_0/checkpoint.pth
+>>>>>>>testing : long_term_forecast_ETTh2_rerun_lkbck_search_2021__2021_DeepEDM_ETTh2_ftM_sl336_ll48_pl336_emdtimeF_test_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 2545
+test shape: (2545, 336, 7) (2545, 336, 7)
+mse:0.36689749360084534, mae:0.39439722895622253, dtw:not calculated

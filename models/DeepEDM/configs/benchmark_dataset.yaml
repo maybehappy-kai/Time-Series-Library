@@ -1,0 +1,41 @@
+#Note: most config params are set in the command line args
+rand_seed: 2021
+model: {
+  type: EDM, #EDM
+  encoder_params: {
+    mlp_layers: 1,
+    use_encoder: False,
+    activation_fn : silu,
+    dropout: 0.1,
+  },
+  n_edm_blocks: 1, #number of edm layers
+  edm_params: {
+    dropout: 0.1,
+    delay: 7, #delay for edm
+    time_delay_stride: 1,
+    layer_norm: True, #whether to use layer norm
+    add_pe: True, #whether to add positional encoding
+    method: simplex, #method to use for edm: simplex or smap
+    activation_fn : silu,
+    theta: 1.0, #theta for edm which weighs different distances
+    dist_projection_dim: 64, #dimension of projection for distance kernel
+    n_proj_layers: 1, #number of projection layers
+  },
+}
+opt: {
+  type: AdamW,
+  learning_rate: 0.0005,
+  schedule_type: custom,
+  epochs: 100,
+  early_stopping_patience: 30,
+  reduce_lr_factor: 0.8,
+  min_lr: 0.00001,
+  weight_decay: 0.00001,
+  clip_grad_norm: 1.0,
+}
+loader: {
+  batch_size: 32,
+  num_workers: 4,
+}
+output_folder: ./ckpt/
+log_dir: ./logs/tb
