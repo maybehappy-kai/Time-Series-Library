@@ -1,8 +1,8 @@
 
 import math
 import torch
-import torchcde
-import datasets
+from . import torchcde
+from . import datasets
 import sklearn.model_selection
 import torchdiffeq
 from random import SystemRandom
@@ -13,8 +13,8 @@ import pathlib
 import os 
 import time 
 import tqdm
-import contime_dataset
-import control_tower
+from . import contime_dataset
+from . import control_tower
 import warnings
 warnings.filterwarnings(action='ignore')
 

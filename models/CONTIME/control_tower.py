@@ -1,6 +1,6 @@
 
-import function_tower 
-import model_tower
+from . import function_tower
+from . import model_tower
 from random import SystemRandom
 import os 
 def Model_selection_part(args,input_channels,output_channels,device):

@@ -36,8 +36,8 @@ from models.TimesNet import Model as TimesNet
 from models.Koopa import Model as Koopa
 from models.TimeFilter.models.TimeFilter import Model as TimeFilter
 from models.FourierGNN.model.FourierGNN import FGN as FourierGNN
-from models.CONTIME.contime import CONTIME
-from models.LinOSS.models.LinOSS import LinOSS
+from models.CONTIME.model_tower import CONTime as CONTIME
+from models.linoss.models.LinOSS import LinOSS
 from models.S_D_Mamba.model.S_Mamba import Model as S_D_Mamba
 from models.TimePro.model.TimePro import Model as TimePro
 from models.DeepEDM.models.DeepEDM import Model as DeepEDM
@@ -45,7 +45,7 @@ from models.SimpleTM.model.SimpleTM import Model as SimpleTM
 from models.TQNet.models.TQNet import Model as TQNet
 from models.ModernTCN.ModernTCN_Long_term_forecasting.models.ModernTCN import Model as ModernTCN
 from models.FilterNet.models.PaiFilter import Model as FilterNet
-from models.NFM.Forecasting.NFM_FC import NFM
+from models.NFM.Forecasting.NFM_FC import NFM_FC as NFM
 from models.TimeKAN.models.TimeKAN import Model as TimeKAN
 from models.SOFTS.models.SOFTS import Model as SOFTS
 from pypots.imputation import TimeMixerPP

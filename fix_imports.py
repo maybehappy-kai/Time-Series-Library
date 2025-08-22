@@ -17,6 +17,7 @@ MODELS_BASE_DIR = "models"
 def fix_imports_in_project(model_name, project_root):
     """
     修复单个模型项目中的所有Python文件的绝对导入问题。
+    此函数现在可以处理 'from module import ...' 和 'import module' 两种情况。
     """
     print(f"\n--- Processing model: {model_name} ---")
 
@@ -24,6 +25,9 @@ def fix_imports_in_project(model_name, project_root):
     top_level_modules = set()
     try:
         for item in os.listdir(project_root):
+            # 忽略隐藏文件和__pycache__
+            if item.startswith('.') or item == '__pycache__':
+                continue
             if item.endswith('.py'):
                 top_level_modules.add(item.replace('.py', ''))
             elif os.path.isdir(os.path.join(project_root, item)) and \
@@ -38,6 +42,7 @@ def fix_imports_in_project(model_name, project_root):
         return
 
     print(f"Found top-level modules: {', '.join(sorted(list(top_level_modules)))}")
+    modules_pattern = '|'.join(re.escape(m) for m in top_level_modules)
 
     # 2. 遍历项目中的所有 .py 文件
     for dirpath, _, filenames in os.walk(project_root):
@@ -47,10 +52,6 @@ def fix_imports_in_project(model_name, project_root):
 
             filepath = os.path.join(dirpath, filename)
 
-            # 3. 计算当前文件相对于项目根的深度
-            relative_dir = os.path.relpath(dirpath, project_root)
-            depth = 0 if relative_dir == '.' else len(relative_dir.split(os.sep))
-
             try:
                 with open(filepath, 'r', encoding='utf-8') as f:
                     content = f.read()
@@ -59,32 +60,43 @@ def fix_imports_in_project(model_name, project_root):
                 continue
 
             original_content = content
+            modified = False
 
-            # 4. 构造正则表达式，用于匹配该项目的所有顶级模块
-            # 例如: from (moduleA|moduleB|moduleC)...
-            modules_pattern = '|'.join(re.escape(m) for m in top_level_modules)
+            # 3. 计算当前文件相对于项目根的深度，并生成相应的前置点
+            relative_dir = os.path.relpath(dirpath, project_root)
+            depth = 0 if relative_dir == '.' else len(relative_dir.split(os.sep))
+            dots = "." * (depth + 1)
+
+            # --- 修正第一步: 处理 'from project_module ...' ---
             # 正则表达式：匹配以 'from' 开头，后跟一个顶级模块名，再跟一个点或空格的行
-            pattern = re.compile(r"^(from\s+)(" + modules_pattern + r")([.\s])", re.MULTILINE)
+            pattern_from = re.compile(r"^(from\s+)(" + modules_pattern + r")([.\s])", re.MULTILINE)
 
-            # 5. 定义替换函数
-            def replacer(match):
-                # match.group(1) is "from "
-                # match.group(2) is the module name (e.g., "utils")
-                # match.group(3) is the character after (space or dot)
-
-                # 计算需要的前缀点
-                # depth 0 (root): one dot '.'
-                # depth 1 (subfolder): two dots '..'
-                dots = "." * (depth + 1)
-
-                # 返回替换后的字符串
+            def replacer_from(match):
+                # group(1)="from ", group(2)=模块名, group(3)=分隔符(. 或 空格)
                 return f"{match.group(1)}{dots}{match.group(2)}{match.group(3)}"
 
-            # 6. 执行替换
-            content = pattern.sub(replacer, content)
+            new_content = pattern_from.sub(replacer_from, content)
+            if new_content != content:
+                modified = True
+                content = new_content
+
+            # --- 修正第二步 (新增): 处理 'import project_module' ---
+            # 正则表达式：匹配以 'import' 开头，后跟一个顶级模块名，且该行结尾没有其他字符
+            pattern_import = re.compile(r"^(import\s+)(" + modules_pattern + r")(\s*)$", re.MULTILINE)
+
+            def replacer_import(match):
+                # group(1)="import ", group(2)=模块名
+                # 将 'import my_module' 转换为 'from . import my_module'
+                return f"from {dots} import {match.group(2)}"
+
+            new_content = pattern_import.sub(replacer_import, content)
+            if new_content != content: # 与上一步的content比较
+                modified = True
+                content = new_content
+
 
             # 7. 如果文件内容有变化，则写回文件
-            if content != original_content:
+            if modified:
                 print(f"  -> Modifying imports in: {os.path.relpath(filepath, MODELS_BASE_DIR)}")
                 try:
                     with open(filepath, 'w', encoding='utf-8') as f:

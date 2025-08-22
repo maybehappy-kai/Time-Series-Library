@@ -1,9 +1,9 @@
 
-import datasets
+from . import datasets
 import pathlib
 import torch
 import os 
-import torchcde
+from . import torchcde
 import numpy as np 
 import sklearn.model_selection
 from sklearn.preprocessing import StandardScaler

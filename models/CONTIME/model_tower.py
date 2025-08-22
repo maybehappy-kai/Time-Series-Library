@@ -1,5 +1,5 @@
 import torch
-import torchcde
+from . import torchcde
 import numpy as np
 import torchdiffeq
 
