@@ -414,23 +414,56 @@ if __name__ == '__main__':
                             epochs=1  # 设为1，因为我们不在这里训练
                         )
                     elif model_name == "CONTIME":
-                        # 1. 将模型名称转为小写，以匹配其内部的 'contime' 判断
-                        current_config_dict['model'] = model_name.lower()
+                        # --- 关键修正：导入CONTIME的核心模块 ---
+                        from models.CONTIME import control_tower, torchcde
 
-                        # 2. 添加其必需的 h_channels 和 dataset 属性
+                        # 1. 准备 CONTIME 所需的全部配置参数
+                        current_config_dict['model'] = model_name.lower()
                         current_config_dict['h_channels'] = current_config_dict['d_model']
                         current_config_dict['dataset'] = current_config_dict['data']
-
-                        # 3. CONTIME 有一个独立的 alpha 参数，这里设置为其默认值
                         current_config_dict['alpha'] = 0.8
+                        current_config_dict['beta'] = 0.01
+                        current_config_dict['ode_method'] = 'rk4'  # 添加默认的ODE求解器
+                        current_config_dict['step_size'] = 0.5  # 添加默认的步长
+                        current_config_dict['file_path'] = './results'
+                        current_config_dict['rnd'] = 1
+
+                        # --- 创建必要的虚拟目录 ---
+                        h_past_path = os.path.join(current_config_dict['file_path'], 'h_past')
+                        dhpastdt_path = os.path.join(current_config_dict['file_path'], 'dhpastdt')
+                        if not os.path.exists(h_past_path):
+                            os.makedirs(h_past_path)
+                        if not os.path.exists(dhpastdt_path):
+                            os.makedirs(dhpastdt_path)
 
                         configs_obj = SimpleNamespace(**current_config_dict)
-                        model = model_info['class'](
-                            configs_obj,  # 第一个参数是 args 对象
+
+                        # 2. 使用 control_tower 来创建原始的 CONTIME 模型
+                        contime_base_model = control_tower.Model_selection_part(
+                            args=configs_obj,
                             input_channels=current_config_dict['enc_in'],
                             output_channels=current_config_dict['c_out'],
-                            device=torch.device('cpu')  # 先在CPU上初始化
+                            device=torch.device('cpu')
                         )
+
+
+                        # --- 核心修正：创建一个包装器来适配 benchmark.py 的调用 ---
+                        class CONTIMEWrapper(torch.nn.Module):
+                            def __init__(self, contime_model, configs):
+                                super().__init__()
+                                self.contime_model = contime_model
+                                self.configs = configs
+
+                            def forward(self, x_enc):
+                                # 在包装器内部，我们为CONTIME准备它所需要的所有参数
+                                times = torch.linspace(0, x_enc.size(1) - 1, x_enc.size(1)).to(x_enc.device)
+                                coeffs = torchcde.cubic_spline_coeffs(x_enc)
+                                # 调用原始模型的forward函数
+                                return self.contime_model(self.configs, x_enc, coeffs, times)[0]  # 只返回预测值
+
+
+                        # 3. 将包装后的模型用于基准测试
+                        model = CONTIMEWrapper(contime_base_model, configs_obj)
                     else:
                         # 其他模型使用通用的 configs 对象
                         configs_obj = SimpleNamespace(**current_config_dict)
