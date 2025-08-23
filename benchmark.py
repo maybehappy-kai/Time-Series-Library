@@ -416,7 +416,7 @@ if __name__ == '__main__':
                     elif model_name == "CONTIME":
                         # --- 关键修正：从最精确的路径导入所需模块和函数 ---
                         from models.CONTIME import control_tower
-                        from models.CONTIME.torchcde.interpolation_cubic import cubic_spline_coeffs
+                        from models.CONTIME.torchcde.interpolation_cubic import natural_cubic_coeffs as cubic_spline_coeffs
 
                         # 1. 准备 CONTIME 所需的全部配置参数
                         current_config_dict['model'] = model_name.lower()
