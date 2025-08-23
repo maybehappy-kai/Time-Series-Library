@@ -414,8 +414,9 @@ if __name__ == '__main__':
                             epochs=1  # 设为1，因为我们不在这里训练
                         )
                     elif model_name == "CONTIME":
-                        # --- 关键修正：导入CONTIME的核心模块 ---
-                        from models.CONTIME import control_tower, torchcde
+                        # --- 关键修正：从最精确的路径导入所需模块和函数 ---
+                        from models.CONTIME import control_tower
+                        from models.CONTIME.torchcde.interpolation_cubic import cubic_spline_coeffs
 
                         # 1. 准备 CONTIME 所需的全部配置参数
                         current_config_dict['model'] = model_name.lower()
@@ -423,8 +424,8 @@ if __name__ == '__main__':
                         current_config_dict['dataset'] = current_config_dict['data']
                         current_config_dict['alpha'] = 0.8
                         current_config_dict['beta'] = 0.01
-                        current_config_dict['ode_method'] = 'rk4'  # 添加默认的ODE求解器
-                        current_config_dict['step_size'] = 0.5  # 添加默认的步长
+                        current_config_dict['ode_method'] = 'rk4'
+                        current_config_dict['step_size'] = 0.5
                         current_config_dict['file_path'] = './results'
                         current_config_dict['rnd'] = 1
 
@@ -447,7 +448,7 @@ if __name__ == '__main__':
                         )
 
 
-                        # --- 核心修正：创建一个包装器来适配 benchmark.py 的调用 ---
+                        # 3. 创建包装器以适配 benchmark.py 的调用
                         class CONTIMEWrapper(torch.nn.Module):
                             def __init__(self, contime_model, configs):
                                 super().__init__()
@@ -455,14 +456,13 @@ if __name__ == '__main__':
                                 self.configs = configs
 
                             def forward(self, x_enc):
-                                # 在包装器内部，我们为CONTIME准备它所需要的所有参数
                                 times = torch.linspace(0, x_enc.size(1) - 1, x_enc.size(1)).to(x_enc.device)
-                                coeffs = torchcde.cubic_spline_coeffs(x_enc)
-                                # 调用原始模型的forward函数
-                                return self.contime_model(self.configs, x_enc, coeffs, times)[0]  # 只返回预测值
+                                # --- 核心修正：直接使用导入的 cubic_spline_coeffs 函数 ---
+                                coeffs = cubic_spline_coeffs(x_enc)
+                                return self.contime_model(self.configs, x_enc, coeffs, times)[0]
 
 
-                        # 3. 将包装后的模型用于基准测试
+                        # 4. 将包装后的模型用于基准测试
                         model = CONTIMEWrapper(contime_base_model, configs_obj)
                     else:
                         # 其他模型使用通用的 configs 对象
