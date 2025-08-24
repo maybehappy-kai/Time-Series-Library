@@ -174,10 +174,15 @@ class ProMamba(nn.Module):
         self.selective_scan = selective_scan_fn
 
         state_dim = self.d_inner // self.patch_num
+        self.state_dim = state_dim  # 保存原始维度
+
+        # 将维度向上填充至最近的16的倍数
+        self.padded_state_dim = (state_dim + 15) // 16 * 16
+
         self.state_pro = getattr(DCNv4, 'DCNv4')(
-            channels=state_dim,
-            kernel_size = 3,
-            group=state_dim // 16,
+            channels=self.padded_state_dim,
+            kernel_size=3,
+            group=self.padded_state_dim // 16,  # 使用填充后的维度来计算分组
             offset_scale=0.5,
             dw_kernel_size=None,
             output_bias=False,
@@ -281,9 +286,25 @@ class ProMamba(nn.Module):
             return_last_state=False,
         )
 
-        h = h.reshape(B, self.patch_num, C//self.patch_num, -1)
+        h = h.reshape(B, self.patch_num, C // self.patch_num, -1)
         h = rearrange(h, "b p pd n -> b (p n) pd")
-        h = self.state_pro(h, shape=(self.patch_num, self.n_var))
+
+        # --- 在调用 DCNv4 前进行动态填充 ---
+        if self.state_dim != self.padded_state_dim:
+            padding_size = self.padded_state_dim - self.state_dim
+            # F.pad 的最后一个参数 (0, padding_size) 表示在最后一个维度（通道维）的末尾填充
+            h_padded = F.pad(h, (0, padding_size))
+        else:
+            h_padded = h
+
+        h_processed = self.state_pro(h_padded, shape=(self.patch_num, self.n_var))
+
+        # --- 在调用 DCNv4 后进行动态裁剪 ---
+        if self.state_dim != self.padded_state_dim:
+            h = h_processed[:, :, :self.state_dim]
+        else:
+            h = h_processed
+
         h = rearrange(h, "b (p n) pd -> b (p pd) n", p=self.patch_num, n=self.n_var)
         
         y = h * Cs

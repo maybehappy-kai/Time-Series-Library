@@ -204,8 +204,6 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     if device.type == 'cpu' or (device.type == 'cuda' and model_name in ["S_D_Mamba", "TimePro"]):
         with torch.no_grad():
             try:
-                # 使用 torchinfo 来分析模型
-                # 注意：profile_inputs 是一个元组，需要用 * 解包
                 summary = torchinfo.summary(actual_model, input_data=profile_inputs, verbose=0)
                 params = summary.total_params
                 macs = summary.total_mult_adds
@@ -213,7 +211,6 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
                 print(f"  [Warning] torchinfo failed: {e}")
                 macs = 0
                 params = sum(p.numel() for p in actual_model.parameters() if p.requires_grad)
-
         stats['Params (M)'] = round(params / 1e6, 4)
         stats['MACs (G)'] = round(macs / 1e9, 4)
         stats['FLOPs (G)'] = round(2 * macs / 1e9, 4)
@@ -224,14 +221,14 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
             _ = model_call()
 
         if device.type == 'cuda':
-            torch.cuda.synchronize()
-            torch.cuda.reset_peak_memory_stats()
+            torch.cuda.synchronize(device=device)
+            torch.cuda.reset_peak_memory_stats(device=device)
 
         start_time = time.time()
         for _ in range(iterations):
             _ = model_call()
         if device.type == 'cuda':
-            torch.cuda.synchronize()
+            torch.cuda.synchronize(device=device)
         end_time = time.time()
 
     total_time = end_time - start_time
@@ -241,7 +238,7 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     stats[f'Throughput ({device_upper}) (samples/s)'] = round(batch_size * iterations / total_time, 4)
 
     if device.type == 'cuda':
-        stats['Max Memory (MB)'] = round(torch.cuda.max_memory_allocated() / 1e6, 4)
+        stats['Max Memory (MB)'] = round(torch.cuda.max_memory_allocated(device=device) / 1e6, 4)
 
     return stats
 
@@ -251,83 +248,39 @@ CONFIG = {
     'batch_size': 8, 'seq_len': 96, 'label_len': 48, 'pred_len': 720, 'channels': 32,
 }
 # E_LAYERS_LIST 和 D_MODEL_LIST 将在主逻辑中根据输入动态设置
+# --- MODELS FOR GROUP 0 ---
 MODELS_TO_TEST = {
-    "DLinear": {"class": DLinear, "params": {"individual": False}},
-    "iTransformer": {"class": iTransformer, "params": {}},
-    "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
-    "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
-    "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
-    "Koopa": {"class": Koopa, "params": {}},
-    "TimeFilter": {"class": TimeFilter, "params": {}},
-    "FourierGNN": {"class": FourierGNN, "params": {}},
-    "CONTIME": {"class": CONTIME, "params": {}},
-    "LinOSS": {"class": LinOSS, "params": {}},
-    "S_D_Mamba": {"class": S_D_Mamba, "params": {}},
-    "TimePro": {"class": TimePro, "params": {}},
-    "DeepEDM": {"class": DeepEDM, "params": {}},
-    "SimpleTM": {"class": SimpleTM, "params": {}},
-    "TQNet": {"class": TQNet, "params": {}},
-    "ModernTCN": {"class": ModernTCN, "params": {}},
-    "FilterNet": {"class": FilterNet, "params": {}},
-    "NFM": {"class": NFM, "params": {}},
-    "TimeKAN": {"class": TimeKAN, "params": {}},
     "TimeMixerPP": {"class": TimeMixerPP, "params": {}},
-    "SOFTS": {"class": SOFTS, "params": {}},
+    "ModernTCN": {"class": ModernTCN, "params": {}},
+    "NFM": {"class": NFM, "params": {}},
+    "TimePro": {"class": TimePro, "params": {}},
 }
 
 # --- 5. 主执行逻辑 ---
 if __name__ == '__main__':
     # --- 根据用户输入设置测试模式 ---
-    available_models = list(MODELS_TO_TEST.keys())
-    print("Available models to test:", ", ".join(available_models), "or input 'all' for full benchmark.")
-    target_model_name = input("请输入您想要测试的模型名称: ")
+    print("--- Running in BATCH mode for Group 0 on GPU 0 ---")
+    E_LAYERS_LIST = [1, 2, 3]
+    D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
 
-    if target_model_name.lower() == 'all':
-        # --- 完整测试模式 ---
-        print("--- Running in FULL benchmark mode for all models. ---")
-        E_LAYERS_LIST = [1, 2, 3]
-        D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
-        # MODELS_TO_TEST 保持不变，包含所有模型
-    # +++ 新增的 SOFAR 模式 +++
-    elif target_model_name.lower() == 'sofar':
-        # --- SOFAR 测试模式 ---
-        print("--- Running in SOFAR mode (all models except ModernTCN, NFM, TimeMixerPP) ---")
-        E_LAYERS_LIST = [1, 2, 3]
-        D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
-        # 从待测试模型中移除指定的模型
-        models_to_exclude = ['ModernTCN', 'NFM', 'TimeMixerPP']
-        MODELS_TO_TEST = {name: info for name, info in MODELS_TO_TEST.items() if name not in models_to_exclude}
-    # +++ 修改结束 +++
-    elif target_model_name in MODELS_TO_TEST:
-        # --- 调试模式 ---
-        print(f"--- Running in DEBUG mode for {target_model_name}. ---")
-        E_LAYERS_LIST = [1]
-        D_MODEL_LIST = [24, 48]
-        MODELS_TO_TEST = {target_model_name: MODELS_TO_TEST[target_model_name]}  # 仅保留目标模型
-    else:
-        print(f"错误：模型 '{target_model_name}' 不在可测试的模型列表中。程序将退出。")
-        exit()
-    # +++ 使用 pandas 生成正确的时间序列 +++
-    # 1. 定义起始时间和数据点数量
+    # --- 生成虚拟数据文件 ---
     start_date = "2023-01-01 00:00:00"
-    num_rows = 1166  # 确保训练集足够大的最小行数
-
-    # 2. 'h' 表示每小时一个数据点，可以根据需要更改为 'min'（分钟）或 'S'（秒）
+    num_rows = 1166
     dates = pd.to_datetime(pd.date_range(start=start_date, periods=num_rows, freq='h'))
-
-    # 3. 创建 DataFrame 并保存到 dummy.csv
-    dummy_df = pd.DataFrame({
-        'date': dates,
-        'OT': range(num_rows)  # 使用简单递增的数值
-    })
+    dummy_df = pd.DataFrame({'date': dates, 'OT': range(num_rows)})
     dummy_df.to_csv('dummy.csv', index=False)
+
+    # --- 指定在 CPU 和特定的 GPU 0 上进行测试 ---
     devices_to_test = [torch.device('cpu')]
     if torch.cuda.is_available():
-        devices_to_test.append(torch.device('cuda'))
+        devices_to_test.append(torch.device('cuda:0'))
 
+    # --- 打印与记录正确的设备信息 ---
     print(f"{'=' * 60}\nStarting benchmark on devices: {[d.type for d in devices_to_test]}")
     print(f"CPU Threads: {torch.get_num_threads()}")
-    if 'cuda' in [d.type for d in devices_to_test]: print(f"CUDA Device: {torch.cuda.get_device_name(0)}")
+    cuda_device_obj = next((d for d in devices_to_test if d.type == 'cuda'), None)
+    if cuda_device_obj:
+        print(f"CUDA Device: {torch.cuda.get_device_name(cuda_device_obj)}")
     print(f"{'=' * 60}")
 
     # +++ 修改后 (最终的、保证运行的版本) +++
@@ -679,8 +632,7 @@ if __name__ == '__main__':
 
     # --- 6. 保存结果 ---
     if not os.path.exists('results'): os.makedirs('results')
-    # +++ 修改下面这行代码 +++
-    output_filename = f"results/benchmark_results_{target_model_name}.csv"
+    output_filename = "results/benchmark_results_group0.csv"
     df = pd.DataFrame(all_results)
 
     fixed_cols = ['Model', 'e_layers', 'd_model', 'Params (M)', 'MACs (G)', 'FLOPs (G)']
@@ -693,7 +645,10 @@ if __name__ == '__main__':
     with open(output_filename, 'w') as f:
         f.write(f"# Benchmark Results\n# Platform: {platform.system()} {platform.release()}\n")
         f.write(f"# CPU: {platform.processor()}\n")
-        if 'cuda' in [d.type for d in devices_to_test]: f.write(f"# CUDA Device: {torch.cuda.get_device_name(0)}\n")
+        # 再次使用动态代码写入设备名称
+        cuda_device_obj = next((d for d in devices_to_test if d.type == 'cuda'), None)
+        if cuda_device_obj:
+            f.write(f"# CUDA Device: {torch.cuda.get_device_name(cuda_device_obj)}\n")
         f.write("\n")
         df.to_csv(f, index=False)
 

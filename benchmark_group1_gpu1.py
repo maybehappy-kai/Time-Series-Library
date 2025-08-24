@@ -95,10 +95,8 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
         masks.append(torch.stack([S, T, ST], dim=0))
     masks = torch.stack(masks, dim=0)
 
-    actual_model = model.model if model_name == "TimeMixerPP" else model
-
-    actual_model.to(device)
-    actual_model.eval()
+    model.to(device)
+    model.eval()
 
     # --- 2. 智能检测并确定正确的模型调用方式 ---
     # 为 TimeMixerPP 创建虚拟的 missing_mask
@@ -126,14 +124,14 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     else:
         try:
             # 尝试 TimeMixerPP 的调用方式
-            # PyPOTS 封装器不可调用, 但其 .model 属性 (即 PyTorch 模型) 是可调用的
-            _ = model.model({
+            # PyPOTS 模型通常接受一个字典作为输入
+            _ = model({
                 "X": x_enc,
                 "missing_mask": missing_mask
             })
 
             def call_timemixerpp():
-                return model.model({
+                return model({
                     "X": x_enc.clone(),
                     "missing_mask": missing_mask.clone()
                 })
@@ -201,18 +199,18 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
                             print("  [Info] Using simple x_enc call style")
 
     # --- 3. 使用确定的调用方式进行所有测试 ---
-    if device.type == 'cpu' or (device.type == 'cuda' and model_name in ["S_D_Mamba", "TimePro"]):
+    if device.type == 'cpu':
         with torch.no_grad():
             try:
                 # 使用 torchinfo 来分析模型
                 # 注意：profile_inputs 是一个元组，需要用 * 解包
-                summary = torchinfo.summary(actual_model, input_data=profile_inputs, verbose=0)
+                summary = torchinfo.summary(model, input_data=profile_inputs, verbose=0)
                 params = summary.total_params
                 macs = summary.total_mult_adds
             except Exception as e:
                 print(f"  [Warning] torchinfo failed: {e}")
                 macs = 0
-                params = sum(p.numel() for p in actual_model.parameters() if p.requires_grad)
+                params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
         stats['Params (M)'] = round(params / 1e6, 4)
         stats['MACs (G)'] = round(macs / 1e9, 4)
@@ -224,14 +222,14 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
             _ = model_call()
 
         if device.type == 'cuda':
-            torch.cuda.synchronize()
-            torch.cuda.reset_peak_memory_stats()
+            torch.cuda.synchronize(device=device)
+            torch.cuda.reset_peak_memory_stats(device=device)
 
         start_time = time.time()
         for _ in range(iterations):
             _ = model_call()
         if device.type == 'cuda':
-            torch.cuda.synchronize()
+            torch.cuda.synchronize(device=device)
         end_time = time.time()
 
     total_time = end_time - start_time
@@ -241,7 +239,7 @@ def get_model_stats_for_device(model, model_name, config, device, iterations=50)
     stats[f'Throughput ({device_upper}) (samples/s)'] = round(batch_size * iterations / total_time, 4)
 
     if device.type == 'cuda':
-        stats['Max Memory (MB)'] = round(torch.cuda.max_memory_allocated() / 1e6, 4)
+        stats['Max Memory (MB)'] = round(torch.cuda.max_memory_allocated(device=device) / 1e6, 4)
 
     return stats
 
@@ -251,62 +249,18 @@ CONFIG = {
     'batch_size': 8, 'seq_len': 96, 'label_len': 48, 'pred_len': 720, 'channels': 32,
 }
 # E_LAYERS_LIST 和 D_MODEL_LIST 将在主逻辑中根据输入动态设置
+# --- MODELS FOR GROUP 1 (REVISED) ---
 MODELS_TO_TEST = {
-    "DLinear": {"class": DLinear, "params": {"individual": False}},
-    "iTransformer": {"class": iTransformer, "params": {}},
-    "PatchTST": {"class": PatchTST, "params": {"patch_len": 16, "stride": 8}},
-    "Crossformer": {"class": Crossformer, "params": {"seg_len": 6}},
     "TimesNet": {"class": TimesNet, "params": {"top_k": 5}},
-    "Koopa": {"class": Koopa, "params": {}},
-    "TimeFilter": {"class": TimeFilter, "params": {}},
-    "FourierGNN": {"class": FourierGNN, "params": {}},
-    "CONTIME": {"class": CONTIME, "params": {}},
-    "LinOSS": {"class": LinOSS, "params": {}},
-    "S_D_Mamba": {"class": S_D_Mamba, "params": {}},
-    "TimePro": {"class": TimePro, "params": {}},
-    "DeepEDM": {"class": DeepEDM, "params": {}},
-    "SimpleTM": {"class": SimpleTM, "params": {}},
-    "TQNet": {"class": TQNet, "params": {}},
-    "ModernTCN": {"class": ModernTCN, "params": {}},
-    "FilterNet": {"class": FilterNet, "params": {}},
-    "NFM": {"class": NFM, "params": {}},
-    "TimeKAN": {"class": TimeKAN, "params": {}},
-    "TimeMixerPP": {"class": TimeMixerPP, "params": {}},
-    "SOFTS": {"class": SOFTS, "params": {}},
 }
 
 # --- 5. 主执行逻辑 ---
 if __name__ == '__main__':
     # --- 根据用户输入设置测试模式 ---
-    available_models = list(MODELS_TO_TEST.keys())
-    print("Available models to test:", ", ".join(available_models), "or input 'all' for full benchmark.")
-    target_model_name = input("请输入您想要测试的模型名称: ")
-
-    if target_model_name.lower() == 'all':
-        # --- 完整测试模式 ---
-        print("--- Running in FULL benchmark mode for all models. ---")
-        E_LAYERS_LIST = [1, 2, 3]
-        D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
-        # MODELS_TO_TEST 保持不变，包含所有模型
-    # +++ 新增的 SOFAR 模式 +++
-    elif target_model_name.lower() == 'sofar':
-        # --- SOFAR 测试模式 ---
-        print("--- Running in SOFAR mode (all models except ModernTCN, NFM, TimeMixerPP) ---")
-        E_LAYERS_LIST = [1, 2, 3]
-        D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
-        # 从待测试模型中移除指定的模型
-        models_to_exclude = ['ModernTCN', 'NFM', 'TimeMixerPP']
-        MODELS_TO_TEST = {name: info for name, info in MODELS_TO_TEST.items() if name not in models_to_exclude}
-    # +++ 修改结束 +++
-    elif target_model_name in MODELS_TO_TEST:
-        # --- 调试模式 ---
-        print(f"--- Running in DEBUG mode for {target_model_name}. ---")
-        E_LAYERS_LIST = [1]
-        D_MODEL_LIST = [24, 48]
-        MODELS_TO_TEST = {target_model_name: MODELS_TO_TEST[target_model_name]}  # 仅保留目标模型
-    else:
-        print(f"错误：模型 '{target_model_name}' 不在可测试的模型列表中。程序将退出。")
-        exit()
+    # --- 设定为完整测试模式 ---
+    print("--- Running in BATCH mode for Group 1 on GPU 1 ---")
+    E_LAYERS_LIST = [1, 2, 3]
+    D_MODEL_LIST = [24, 48, 64, 128, 256, 512]
     # +++ 使用 pandas 生成正确的时间序列 +++
     # 1. 定义起始时间和数据点数量
     start_date = "2023-01-01 00:00:00"
@@ -321,13 +275,16 @@ if __name__ == '__main__':
         'OT': range(num_rows)  # 使用简单递增的数值
     })
     dummy_df.to_csv('dummy.csv', index=False)
+    # 修正后：在 CPU 和 GPU 1 上进行测试
     devices_to_test = [torch.device('cpu')]
     if torch.cuda.is_available():
-        devices_to_test.append(torch.device('cuda'))
+        devices_to_test.append(torch.device('cuda:1'))
 
     print(f"{'=' * 60}\nStarting benchmark on devices: {[d.type for d in devices_to_test]}")
     print(f"CPU Threads: {torch.get_num_threads()}")
-    if 'cuda' in [d.type for d in devices_to_test]: print(f"CUDA Device: {torch.cuda.get_device_name(0)}")
+    cuda_device_obj = next((d for d in devices_to_test if d.type == 'cuda'), None)
+    if cuda_device_obj:
+        print(f"CUDA Device: {torch.cuda.get_device_name(cuda_device_obj)}")
     print(f"{'=' * 60}")
 
     # +++ 修改后 (最终的、保证运行的版本) +++
@@ -493,44 +450,24 @@ if __name__ == '__main__':
                             key=key
                         )
                     elif model_name == "NFM":
-                        # 1. 导入 HyperVariables 类（使用您提供的正确路径）
-                        from models.NFM.utils.vars_ import HyperVariables
-
-                        # 2. 准备创建 HyperVariables 对象所需的配置
-                        seq_len = current_config_dict['seq_len']
-                        pred_len = current_config_dict['pred_len']
-
-                        # NFM 使用特定的列表格式来定义训练和测试的数据形状
-                        # 格式为: [输出采样率, 输入采样率, 目标长度, 输入长度]
-                        # 在此评测场景下，我们可以将采样率设置为与长度相同
-                        training_setup = [seq_len, seq_len, pred_len, seq_len]
-
-                        # 3. 创建 HyperVariables 实例
-                        # 我们将评测脚本中的参数映射到 HyperVariables 构造函数所需的参数
-                        hypervars = HyperVariables(
-                            sets_in_training=training_setup,
-                            sets_in_testing=training_setup,
-                            freq_span=-1,  # -1 表示使用全频谱
-                            C_=current_config_dict['enc_in'],
-                            channel_dependence=1 - current_config_dict.get('channel_independence', 0),
-                            # channel_independence 为 0 时，依赖性为 1
-                            hidden_dim=current_config_dict['d_model'],
-                            layer_num=current_config_dict['e_layers'],
-                            dropout=current_config_dict.get('dropout', 0.1),
-                            # 以下参数可以使用 NFM 项目中的常见默认值
-                            filter_type="INFF",
-                            hidden_factor=3,
-                            inff_siren_hidden=32,
-                            inff_siren_omega=30,
-                            lft=True,
-                            lft_siren_dim_in=32,
-                            lft_siren_hidden=32,
-                            lft_siren_omega=30,
-                            print_inf=False  # 在评测脚本中关闭冗余信息打印
+                        # NFM 需要独立的参数
+                        model = model_info['class'](
+                            seq_len=current_config_dict['seq_len'],
+                            pred_len=current_config_dict['pred_len'],
+                            enc_in=current_config_dict['enc_in'],
+                            d_model=current_config_dict['d_model'],
+                            e_layers=current_config_dict['e_layers'],
+                            d_ff=current_config_dict['d_ff'],
+                            # 以下为NFM的特有参数，使用默认值
+                            M=1024,
+                            out_channel=16,
+                            r=4,
+                            ll=1,
+                            attn='softmax',
+                            num_L=3,
+                            num_S=3,
+                            num_heads=4
                         )
-
-                        # 4. 使用创建好的 hypervars 对象来实例化 NFM_FC 模型
-                        model = model_info['class'](hypervars)
                     elif model_name == "TimeMixerPP":
                         # TimeMixerPP 需要独立的参数
                         model = model_info['class'](
@@ -680,7 +617,7 @@ if __name__ == '__main__':
     # --- 6. 保存结果 ---
     if not os.path.exists('results'): os.makedirs('results')
     # +++ 修改下面这行代码 +++
-    output_filename = f"results/benchmark_results_{target_model_name}.csv"
+    output_filename = "results/benchmark_results_group1.csv"
     df = pd.DataFrame(all_results)
 
     fixed_cols = ['Model', 'e_layers', 'd_model', 'Params (M)', 'MACs (G)', 'FLOPs (G)']
@@ -693,7 +630,9 @@ if __name__ == '__main__':
     with open(output_filename, 'w') as f:
         f.write(f"# Benchmark Results\n# Platform: {platform.system()} {platform.release()}\n")
         f.write(f"# CPU: {platform.processor()}\n")
-        if 'cuda' in [d.type for d in devices_to_test]: f.write(f"# CUDA Device: {torch.cuda.get_device_name(0)}\n")
+        cuda_device_obj = next((d for d in devices_to_test if d.type == 'cuda'), None)
+        if cuda_device_obj:
+            f.write(f"# CUDA Device: {torch.cuda.get_device_name(cuda_device_obj)}\n")
         f.write("\n")
         df.to_csv(f, index=False)
 

@@ -16,6 +16,17 @@ class RevIN(nn.Module):
         if self.affine:
             self._init_params()
 
+        # +++ 最终调试代码 +++
+        # print(f"[DEBUG] Inside RevIN.__init__: num_features = {num_features} (Type: {type(num_features)})")
+        # try:
+        #     # 模拟PyTorch底层操作，提前暴露错误
+        #     print("[DEBUG] RevIN: Attempting to use num_features to create a tensor...")
+        #     _ = torch.empty(self.num_features)
+        #     print("[DEBUG] RevIN: Tensor creation successful!")
+        # except Exception as e:
+        #     print(f"[DEBUG] RevIN: FAILED to create tensor. Error: {e}")
+        # +++ 最终调试代码结束 +++
+
     def forward(self, x, mode:str):
         if mode == 'norm':
             self._get_statistics(x)

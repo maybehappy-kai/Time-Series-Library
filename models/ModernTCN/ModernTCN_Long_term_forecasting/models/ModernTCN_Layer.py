@@ -41,12 +41,16 @@ class series_decomp(nn.Module):
 # forecast task head
 class Flatten_Head(nn.Module):
     def __init__(self, individual, n_vars, nf, target_window, head_dropout=0):
-        super(Flatten_Head, self).__init__()
+        super().__init__()
+        # print(f"\n[Flatten_Head INIT] Initializing Head...")
+        # print(
+        #     f"[Flatten_Head INIT] individual: {individual}, n_vars: {n_vars}, nf: {nf}, target_window: {target_window}\n")
 
         self.individual = individual
         self.n_vars = n_vars
 
         if self.individual:
+            # 您当前的使用场景不会进入这个分支，但我们仍然保持其完整性
             self.linears = nn.ModuleList()
             self.dropouts = nn.ModuleList()
             self.flattens = nn.ModuleList()
@@ -55,21 +59,39 @@ class Flatten_Head(nn.Module):
                 self.linears.append(nn.Linear(nf, target_window))
                 self.dropouts.append(nn.Dropout(head_dropout))
         else:
+            # 这是您实际使用的分支
             self.flatten = nn.Flatten(start_dim=-2)
             self.linear = nn.Linear(nf, target_window)
             self.dropout = nn.Dropout(head_dropout)
 
-    def forward(self, x):  # x: [bs x nvars x d_model x patch_num]
+    def forward(self, x):
+        # --- 内部法医级检查 ---
+        # print("\n      [HEAD_FWD] --- 进入 Flatten_Head.forward ---")
+        # print(f"      [HEAD_FWD] 接收到的 x 维度: {x.shape}")
+        # print(f"      [HEAD_FWD] 接收到的 x 是否连续: {x.is_contiguous()}")
+
         if self.individual:
             x_out = []
             for i in range(self.n_vars):
-                z = self.flattens[i](x[:, i, :, :])  # z: [bs x d_model * patch_num]
-                z = self.linears[i](z)  # z: [bs x target_window]
+                z = self.flattens[i](x[:, i, :, :])
+                z = self.linears[i](z)
                 z = self.dropouts[i](z)
                 x_out.append(z)
-            x = torch.stack(x_out, dim=1)  # x: [bs x nvars x target_window]
+            x = torch.stack(x_out, dim=1)
         else:
+            # 逐行执行并打印日志
+            # print(f"      [HEAD_FWD] 即将执行 flatten 操作...")
             x = self.flatten(x)
+            # print(f"      [HEAD_FWD] Flatten 操作后维度: {x.shape}")
+            # print(f"      [HEAD_FWD] Flatten 操作后是否连续: {x.is_contiguous()}")
+
+            # print(f"      [HEAD_FWD] 即将执行 linear 操作...")
             x = self.linear(x)
+            # print(f"      [HEAD_FWD] Linear 操作后维度: {x.shape}")
+
+            # print(f"      [HEAD_FWD] 即将执行 dropout 操作...")
             x = self.dropout(x)
+            # print(f"      [HEAD_FWD] Dropout 操作后维度: {x.shape}")
+
+        # print("      [HEAD_FWD] --- 成功退出 Flatten_Head.forward ---\n")
         return x
